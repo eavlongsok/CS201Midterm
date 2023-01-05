@@ -8,3 +8,8 @@ if you're in VSCode, type:
 
 if you're in Windows CMD, type:
 main.exe
+
+==========================================
+or just type:
+./build.bat     (in VSCode)
+build.bat       (in CMD)

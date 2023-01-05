@@ -1,5 +1,8 @@
 #include <iostream>
+#include <cctype>
 #include "database.h"
+
+std::string toUpperCase(const std::string&);
 
 // constructors
 Database::Database() {
@@ -33,6 +36,11 @@ Database& Database::operator=(const Database& db) {
     return *this;
 }
 
+// destructor
+Database::~Database() {
+    delete[] products;
+}
+
 // getters and setters
 int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
@@ -51,10 +59,31 @@ void Database::push_back(Product product) {
     setSize(getSize() + 1);
 }
 
+void Database::pop_front() {
+    Product product = products[getSize() - 1];
+    sendFirstElementToLast();
+    setSize(getSize() - 1);
+}
+
 void Database::printDatabase() {
     for (int i = 0; i < this->getSize(); i++) {
         printProduct(this->products[i]);
     }
+}
+
+void Database::search(int field, std::string targetValue) {
+    bool found = false;
+    for (int i = 0; i < getSize(); i++) {
+        if (toUpperCase(getDataFromFieldAtIndex(field, i)) == toUpperCase(targetValue)){
+            printProduct(products[i]);
+            found = true;
+        }
+    }
+    if (!found) std::cout << "Not found" << std::endl;
+}
+
+void Database::searchID(std::string id) {
+    search(ID, id);
 }
 
 // helper methods
@@ -84,6 +113,45 @@ void Database::printProduct(const Product &product) {
     std::cout << product.category << "\t" << product.name << "\t\t" << product.price << "\t\t" << product.ID << "\t\t" << (product.availability ? "In stock" : "Out of stock") << "\t" << product.description << std::endl;
 }
 
+void Database::sendFirstElementToLast() {
+    for (int i = 1; i < getSize(); i++) {
+        Product tmp = products[i-1];
+        products[i-1] = products[i];
+        products[i] = tmp;
+    }
+}
+
 void Database::printClassInfo() {
     std::cout << this->getSize() << " " << this->getCapacity() << std::endl;
+}
+
+std::string Database::getDataFromFieldAtIndex(int field, int index) {
+    switch (field) {
+        case 1:
+            return products[index].category;
+        case 2:
+            return products[index].name;
+        case 3:
+            return std::to_string(products[index].price);
+        case 4:
+            return products[index].ID;
+        case 5:
+            return std::to_string(products[index].availability);
+        case 6:
+            return products[index].description;
+        default:
+            return "Not a valid field";
+    }
+}
+
+
+
+
+
+std::string toUpperCase(const std::string &s) {
+    std::string newString;
+    for (char c: s) {
+        newString += toupper(c);
+    }
+    return newString;
 }

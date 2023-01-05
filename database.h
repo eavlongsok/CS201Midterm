@@ -12,6 +12,15 @@ struct Product {
     std::string description; // might remove later
 };
 
+enum fields {
+    category = 1,
+    name,
+    price,
+    ID,
+    availability,
+    description
+};
+
 class Database {
     private:
         const static int MINIMUM_CAPACITY = 10;
@@ -22,11 +31,16 @@ class Database {
         void reallocateProducts();
         static void copyProduct(Product &source, const Product &destination);
         void printProduct(const Product &product);
+        void sendFirstElementToLast();
+        std::string getDataFromFieldAtIndex(int field, int index);
 
-    public:
+       public:
         // constructor
         Database();
         Database(const Database& db);
+
+        // destructor
+        ~Database();
 
         // getters and setters
         int getSize() const;
@@ -41,7 +55,7 @@ class Database {
         void push_back(Product product);
         void pop_front();
         void printDatabase();
-        void search(std::string field, std::string targetValue);
+        void search(int field, std::string targetValue);
         void searchID(std::string id);
         void printClassInfo(); // temporary, for testing purposes
 };
