@@ -1,6 +1,6 @@
 To compile the main program, type:
 
-g++ main.cpp database.cpp main.exe
+g++ main.cpp database.cpp -o main.exe
 
 then to run the program,
 if you're in VSCode, type:
