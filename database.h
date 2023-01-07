@@ -12,27 +12,48 @@ struct Product {
     std::string description; // might remove later
 };
 
-enum fields {
-    category = 1,
-    name,
-    price,
-    ID,
-    availability,
-    description
+enum Color {
+    BLACK,
+    BLUE,
+    GREEN,
+    CYAN,
+    RED,
+    MAGENTA,
+    BROWN,
+    LIGHTGRAY,
+    DARKGRAY,
+    LIGHTBLUE,
+    LIGHTGREEN,
+    LIGHTCYAN,
+    LIGHTRED,
+    LIGHTMAGENTA,
+    YELLOW,
+    WHITE,
 };
+
+// enum fields {
+//     category = 1,
+//     name,
+//     price,
+//     ID,
+//     availability,
+//     description
+// };
 
 class Database {
     private:
-        const static int MINIMUM_CAPACITY = 10;
+        const static int MINIMUM_CAPACITY = 1;
         int size;
         int capacity;
+        int startingIndex;
+        int endingIndex;
         Product *products;   // pointer to array
         // helper methods
         void reallocateProducts();
-        static void copyProduct(Product &source, const Product &destination);
-        void printProduct(const Product &product);
-        void sendFirstElementToLast();
-        std::string getDataFromFieldAtIndex(int field, int index);
+        static void copyProduct(Product &destination, const Product &source);
+        static void printProduct(const Product &product);
+        // void sendFirstElementToLast();
+        // std::string getDataFromFieldAtIndex(int field, int index);
 
        public:
         // constructor
@@ -47,6 +68,10 @@ class Database {
         int getCapacity() const ;
         void setSize(int size);
         void setCapacity(int capacity);
+        int getStartingIndex() const;
+        void setStartingIndex(int index);
+        int getEndingIndex() const;
+        void setEndingindex();
 
         // operators overload
         Database& operator=(const Database& db);
@@ -60,4 +85,5 @@ class Database {
         void printClassInfo(); // temporary, for testing purposes
 };
 
+void setColor(Color color);
 #endif
