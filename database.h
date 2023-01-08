@@ -8,7 +8,7 @@ struct Product {
     std::string name;
     double price;
     std::string ID;
-    bool availability;
+    bool status;
     std::string description; // might remove later
 };
 
@@ -36,7 +36,7 @@ enum Color {
 //     name,
 //     price,
 //     ID,
-//     availability,
+//     status,
 //     description
 // };
 
@@ -52,10 +52,14 @@ class Database {
         void reallocateProducts();
         static void copyProduct(Product &destination, const Product &source);
         static void printProduct(const Product &product);
+        static void printSearchResult(const Product &product);
+        std::string generateID(const Database &db);
+        bool uniqueID(std::string idStr, const Database &db);
+        std::string convertIdToString(unsigned long idNum);
         // void sendFirstElementToLast();
         // std::string getDataFromFieldAtIndex(int field, int index);
 
-       public:
+    public:
         // constructor
         Database();
         Database(const Database& db);
@@ -68,6 +72,7 @@ class Database {
         int getCapacity() const ;
         void setSize(int size);
         void setCapacity(int capacity);
+        Product *getProducts() const;
         int getStartingIndex() const;
         void setStartingIndex(int index);
         int getEndingIndex() const;
@@ -80,7 +85,7 @@ class Database {
         void push_back(Product product);
         void pop_front();
         void printDatabase();
-        void search(int field, std::string targetValue);
+        // void search(int field, std::string targetValue);
         void searchID(std::string id);
         void printClassInfo(); // temporary, for testing purposes
 };

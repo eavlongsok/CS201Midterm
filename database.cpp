@@ -2,10 +2,12 @@
 #include <cctype>
 #include <iomanip>
 #include <Windows.h>
+#include <stdlib.h>
 #include "database.h"
 
-const std::string _SEPARATOR_ = "+" + std::string(122, '-') + "+";
+const std::string _SEPARATOR_ = "+" + std::string(130, '-') + "+";
 const HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
 // helper function
 // std::string toUpperCase(const std::string&);
 
@@ -55,6 +57,7 @@ int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
 void Database::setSize(int size) { this->size = size; }
 void Database::setCapacity(int capacity) { this->capacity = capacity; }
+Product* Database::getProducts() const { return this->products; }
 int Database::getStartingIndex() const { return this->startingIndex; }
 void Database::setStartingIndex(int index) { this->startingIndex = index; }
 int Database::getEndingIndex() const { return this->endingIndex; }
@@ -78,7 +81,7 @@ void Database::pop_front() {
     if (size == 0) {
         setColor(RED);
         std::cout << "There are no item in the database" << std::endl;
-        setColor(BLACK);
+        setColor(LIGHTGRAY);
         return;
     }
     // sendFirstElementToLast();
@@ -94,23 +97,23 @@ void Database::printDatabase() {
     if (size == 0) {
         setColor(RED);
         std::cout << "There are no item in the database" << std::endl;
-        setColor(BLACK);
+        setColor(LIGHTGRAY);
         return;
     }
     setColor(MAGENTA);
     std::cout << _SEPARATOR_ << std::endl;
-    std::cout << std::left << "| " << std::setw(10) << "CATEGORY"
+    std::cout << std::left << "| " << std::setw(15) << "CATEGORY"
               << "| " << std::setw(20) << "NAME"
               << "| " << std::setw(12) << "PRICE"
               << "| " << std::setw(10) << "ID"
-              << "| " << std::setw(15) << "AVAILABILITY"
-              << "| " << std::setw(44) << "DESCRIPTION" << "|"
+              << "| " << std::setw(15) << "status"
+              << "| " << std::setw(47) << "DESCRIPTION" << "|"
               << std::endl;
     std::cout << _SEPARATOR_ << std::endl;
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         printProduct(this->products[i]);
     }
-    setColor(BLACK);
+    setColor(LIGHTGRAY);
 }
 
 
@@ -128,16 +131,13 @@ void Database::printDatabase() {
 void Database::searchID(std::string id) {
     for (int i = getStartingIndex(); i <= getStartingIndex() + getSize(); i++) {
         if (products[i].ID == id) {
-            setColor(GREEN);
-            std::cout << _SEPARATOR_ << std::endl;
-            printProduct(products[i]);
-            setColor(BLACK);
+            printSearchResult(products[i]);
             return;
         }
     }
     setColor(LIGHTRED);
     std::cout << "Not found!" << std::endl;
-    setColor(BLACK);
+    setColor(LIGHTGRAY);
     // search(ID, id);
 }
 
@@ -162,20 +162,35 @@ void Database::copyProduct(Product& destination, const Product& source) {
     destination.name = source.name;
     destination.price = source.price;
     destination.ID = source.ID;
-    destination.availability = source.availability;
+    destination.status = source.status;
     destination.description = source.description;
 }
 
 void Database::printProduct(const Product &product) {
-    std::cout << std::left << "| " << std::setw(10) << product.category
+    std::cout << std::left << "| " << std::setw(15) << product.category
               << "| " << std::setw(20) << product.name
               << "| " << std::setw(12) << product.price
               << "| " << std::setw(10) << product.ID
-              << "| " << std::setw(15) << (product.availability ? "In stock" : "Out of stock")
-              << "| " << std::setw(44) << product.description << "|"
+              << "| " << std::setw(15) << (product.status ? "In stock" : "Out of stock")
+              << "| " << std::setw(47) << product.description << "|"
               << std::endl;
     std::cout << _SEPARATOR_ << std::endl;
-    // std::cout << product.category << "\t" << product.name << "\t\t" << product.price << "\t\t" << product.ID << "\t\t" << (product.availability ? "In stock" : "Out of stock") << "\t" << product.description << std::endl;
+    // std::cout << product.category << "\t" << product.name << "\t\t" << product.price << "\t\t" << product.ID << "\t\t" << (product.status ? "In stock" : "Out of stock") << "\t" << product.description << std::endl;
+}
+
+void Database::printSearchResult(const Product &product) {
+    setColor(GREEN);
+    std::cout << _SEPARATOR_ << std::endl;
+    std::cout << std::left << "| " << std::setw(15) << "CATEGORY"
+                << "| " << std::setw(20) << "NAME"
+                << "| " << std::setw(12) << "PRICE"
+                << "| " << std::setw(10) << "ID"
+                << "| " << std::setw(15) << "STATUS"
+                << "| " << std::setw(47) << "DESCRIPTION" << "|"
+                << std::endl;
+    std::cout << _SEPARATOR_ << std::endl;
+    printProduct(product);
+    setColor(LIGHTGRAY);
 }
 
 // void Database::sendFirstElementToLast() {
@@ -194,6 +209,7 @@ void setColor(Color color) {
     SetConsoleTextAttribute(h, color);
 }
 
+
 // std::string Database::getDataFromFieldAtIndex(int field, int index) {
 //     switch (field) {
 //         case 1:
@@ -205,7 +221,7 @@ void setColor(Color color) {
 //         case 4:
 //             return products[index].ID;
 //         case 5:
-//             return std::to_string(products[index].availability);
+//             return std::to_string(products[index].status);
 //         case 6:
 //             return products[index].description;
 //         default:
