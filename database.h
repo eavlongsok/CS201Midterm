@@ -3,15 +3,17 @@
 
 #include <string>
 
+// structure of Product
 struct Product {
     std::string category;
     std::string name;
     double price;
     std::string ID;
-    bool status;
-    std::string description; // might remove later
+    unsigned int quantity;
+    std::string description;
 };
 
+// colors for the text in terminal
 enum Color {
     BLACK,
     BLUE,
@@ -31,33 +33,16 @@ enum Color {
     WHITE,
 };
 
-// enum fields {
-//     category = 1,
-//     name,
-//     price,
-//     ID,
-//     status,
-//     description
-// };
-
 class Database {
     private:
-        const static int MINIMUM_CAPACITY = 1;
-        int size;
-        int capacity;
-        int startingIndex;
-        int endingIndex;
+        const static int MINIMUM_CAPACITY = 10;
+        int size;   // the number of elements
+        int capacity;   // the number of elements that can be stored
+        int startingIndex;  // the start of the list
+        int endingIndex;    // the end of the list
         Product *products;   // pointer to array
         // helper methods
         void reallocateProducts();
-        static void copyProduct(Product &destination, const Product &source);
-        static void printProduct(const Product &product);
-        static void printSearchResult(const Product &product);
-        std::string generateID(const Database &db);
-        bool uniqueID(std::string idStr, const Database &db);
-        std::string convertIdToString(unsigned long idNum);
-        // void sendFirstElementToLast();
-        // std::string getDataFromFieldAtIndex(int field, int index);
 
     public:
         // constructor
@@ -82,13 +67,15 @@ class Database {
         Database& operator=(const Database& db);
 
         // main methods
+        // feature 1
+        void printDatabase();
+        // feature 2
         void push_back(Product product);
         void pop_front();
-        void printDatabase();
-        // void search(int field, std::string targetValue);
+        // feature 3
         void searchID(std::string id);
-        void printClassInfo(); // temporary, for testing purposes
 };
 
+// additional function to use in order to change the color of the text in the terminal
 void setColor(Color color);
 #endif

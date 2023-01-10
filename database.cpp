@@ -5,14 +5,23 @@
 #include <stdlib.h>
 #include "database.h"
 
-const std::string _SEPARATOR_ = "+" + std::string(130, '-') + "+";
+// the line seperator
+const std::string _SEPARATOR_ = "+" + std::string(141, '-') + "+";
+// handle for setColor()
 const HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
-// helper function
-// std::string toUpperCase(const std::string&);
+// helper functions declaration
+void copyProduct(Product &destination, const Product &source);
+void printProduct(const Product &product);
+void printSearchResult(const Product &product);
+void printHeader();
+// to limit the length of string in the output
+std::string limitStr(std::string s, int limit);
+
 
 // constructors
 Database::Database() {
+    // set to default values
     setSize(0);
     setCapacity(MINIMUM_CAPACITY);
     this->products = new Product[capacity];
@@ -27,12 +36,17 @@ Database::Database(const Database& db) {
 // operator overload
 Database& Database::operator=(const Database& db) {
     if (this != &db) {
-        // copy products
+        // copy data members
+
+        // the new Product[2] is just there to ensure that we have something to delete later on, otherwise it would result in segmentation fault
+        this->products = new Product[2];
+        // set data members of the left side of operator= to have the same value as the right side of the operator
         this->setSize(db.getSize());
         this->setCapacity(db.getCapacity());
         this->setStartingIndex(0);
         this->setEndingindex();
 
+        // a pointer to a new array of products
         Product* tmp = new Product[db.getCapacity()];
 
         for (int i = db.getStartingIndex(), j = 0; i <= db.getEndingIndex(); i++, j++) {
@@ -49,6 +63,7 @@ Database& Database::operator=(const Database& db) {
 
 // destructor
 Database::~Database() {
+    // delete the data in the array
     delete[] products;
 }
 
@@ -72,7 +87,6 @@ void Database::push_back(Product product) {
 
     // at an element at index size, then increase size
     setSize(getSize() + 1);
-    setStartingIndex(0);
     setEndingindex();
     products[endingIndex] = product;
 }
@@ -87,7 +101,6 @@ void Database::pop_front() {
     // sendFirstElementToLast();
     setStartingIndex(getStartingIndex() + 1);
     setSize(getSize() - 1);
-    setEndingindex();
     if (getStartingIndex() >= getSize()) {
         reallocateProducts();
     }
@@ -101,15 +114,7 @@ void Database::printDatabase() {
         return;
     }
     setColor(MAGENTA);
-    std::cout << _SEPARATOR_ << std::endl;
-    std::cout << std::left << "| " << std::setw(15) << "CATEGORY"
-              << "| " << std::setw(20) << "NAME"
-              << "| " << std::setw(12) << "PRICE"
-              << "| " << std::setw(10) << "ID"
-              << "| " << std::setw(15) << "status"
-              << "| " << std::setw(47) << "DESCRIPTION" << "|"
-              << std::endl;
-    std::cout << _SEPARATOR_ << std::endl;
+    printHeader();
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         printProduct(this->products[i]);
     }
@@ -157,82 +162,57 @@ void Database::reallocateProducts() {
     setEndingindex();
  }
 
-void Database::copyProduct(Product& destination, const Product& source) {
+void copyProduct(Product& destination, const Product& source) {
     destination.category = source.category;
     destination.name = source.name;
     destination.price = source.price;
     destination.ID = source.ID;
-    destination.status = source.status;
+    destination.quantity = source.quantity;
     destination.description = source.description;
 }
 
-void Database::printProduct(const Product &product) {
-    std::cout << std::left << "| " << std::setw(15) << product.category
-              << "| " << std::setw(20) << product.name
-              << "| " << std::setw(12) << product.price
+void printProduct(const Product &product) {
+    std::cout << std::left << std::fixed << std::setprecision(2) << "| " << std::setw(22) << limitStr(product.category, 17)
+              << "| " << std::setw(26) << limitStr(product.name, 22)
+              << "| " << std::setw(15) << product.price
               << "| " << std::setw(10) << product.ID
-              << "| " << std::setw(15) << (product.status ? "In stock" : "Out of stock")
-              << "| " << std::setw(47) << product.description << "|"
+              << "| " << std::setw(10) << product.quantity
+              << "| " << std::setw(47) << limitStr(product.description, 45) << "|"
               << std::endl;
     std::cout << _SEPARATOR_ << std::endl;
-    // std::cout << product.category << "\t" << product.name << "\t\t" << product.price << "\t\t" << product.ID << "\t\t" << (product.status ? "In stock" : "Out of stock") << "\t" << product.description << std::endl;
 }
 
-void Database::printSearchResult(const Product &product) {
+void printSearchResult(const Product &product) {
     setColor(GREEN);
-    std::cout << _SEPARATOR_ << std::endl;
-    std::cout << std::left << "| " << std::setw(15) << "CATEGORY"
-                << "| " << std::setw(20) << "NAME"
-                << "| " << std::setw(12) << "PRICE"
-                << "| " << std::setw(10) << "ID"
-                << "| " << std::setw(15) << "STATUS"
-                << "| " << std::setw(47) << "DESCRIPTION" << "|"
-                << std::endl;
-    std::cout << _SEPARATOR_ << std::endl;
+    printHeader();
     printProduct(product);
     setColor(LIGHTGRAY);
 }
 
-// void Database::sendFirstElementToLast() {
-//     for (int i = 1; i < getSize(); i++) {
-//         Product tmp = products[i-1];
-//         products[i-1] = products[i];
-//         products[i] = tmp;
-//     }
-// }
-
-void Database::printClassInfo() {
-    std::cout << this->getStartingIndex() << " " << this->getEndingIndex() << " " << this->getSize() << " " << this->getCapacity() << std::endl;
+void printHeader() {
+    std::cout << _SEPARATOR_ << std::endl;
+    std::cout << std::left << "| " << std::setw(22) << "CATEGORY"
+                << "| " << std::setw(26) << "NAME"
+                << "| " << std::setw(15) << "PRICE ($)"
+                << "| " << std::setw(10) << "ID"
+                << "| " << std::setw(10) << "QUANTITY"
+                << "| " << std::setw(47) << "DESCRIPTION" << "|"
+                << std::endl;
+    std::cout << _SEPARATOR_ << std::endl;
 }
 
 void setColor(Color color) {
     SetConsoleTextAttribute(h, color);
 }
 
+std::string limitStr(std::string s, int limit) {
+    if (s.length() > limit) {
+        s = s.substr(0, limit);
+        s += "...";
+    }
+    return s;
+}
 
-// std::string Database::getDataFromFieldAtIndex(int field, int index) {
-//     switch (field) {
-//         case 1:
-//             return products[index].category;
-//         case 2:
-//             return products[index].name;
-//         case 3:
-//             return std::to_string(products[index].price);
-//         case 4:
-//             return products[index].ID;
-//         case 5:
-//             return std::to_string(products[index].status);
-//         case 6:
-//             return products[index].description;
-//         default:
-//             return "Not a valid field";
-//     }
-// }
-
-// std::string toUpperCase(const std::string &s) {
-//     std::string newString;
-//     for (char c: s) {
-//         newString += toupper(c);
-//     }
-//     return newString;
-// }
+std::string limitDoubleLength(double num) {
+    return std::to_string(num);
+}

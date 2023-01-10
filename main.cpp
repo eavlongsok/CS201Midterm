@@ -1,7 +1,3 @@
-// structure of database => struct Fields{...};
-// container: called Database, act as vector, but has feature of stack
-// features and specification: display data as row, has 3 data members, is an array, push_back, pop_front, search and display, search by ID
-
 #include <iostream>
 #include <vector>
 #include <limits>
@@ -15,10 +11,13 @@ Product getProductInfo(const Database &db);
 string generateID(const Database &db);
 bool uniqueID(string idStr, const Database &db);
 string convertIdToString(unsigned long idNum);
+string capitalize(string s);
+string trim(string s);
 
-const unsigned int NUMBER_OF_DIGITS_FOR_ID = 5;
+const unsigned int NUMBER_OF_DIGITS_FOR_ID = 0; // at least 1
 
 int main() {
+    system("cls");
     setColor(CYAN);
     cout << "<<<  Product Catalog Database  >>>" << endl << endl;
     bool exit = false;
@@ -37,6 +36,14 @@ int main() {
                 exit = true;
                 break;
             case 1:
+                if (db.getSize() == pow(10, NUMBER_OF_DIGITS_FOR_ID) || NUMBER_OF_DIGITS_FOR_ID == 0) {
+                    setColor(RED);
+                    cout << "All the IDs have been exhausted! Please increase the number of digits for the ID" << endl;
+                    setColor(LIGHTGRAY);
+                    exit = true;
+                    break;
+                }
+                system("cls");
                 product = getProductInfo(db);
                 db.push_back(product);
                 setColor(GREEN);
@@ -58,6 +65,7 @@ int main() {
                 db.searchID(idStr);
                 break;
             case 4:
+                system("cls");
                 db.printDatabase();
                 break;
             default:
@@ -67,41 +75,10 @@ int main() {
                 break;
         }
     }
-    // Database db;
-    // db.printDatabase();
-    // cout << "db:\n";
-    // db.printClassInfo();
-    // Product product1 = {"Phone", "IPhone", 1399.99, "69420", true, "A phone from Apple"};
-    // Product product2 = {"Laptop", "ZenBook", 1049.99, "1369", false, "A laptop from Asus"};
-    // Product product3 = {"Mouse", "Logitech G302", 42.99, "12903", true, "A wireless mouse from Logitech"};
-    // db.push_back(product1);
-    // db.push_back(product2);
-    // db.push_back(product3);
-    // db.printDatabase();
-
-    // db.printClassInfo();
-    // db.pop_front();
-    // db.printClassInfo();
-    // db.printDatabase();
-
-    // // testing for copy constructor and assignment operator overloading
-    // Database newDB;
-    // newDB = db;
-    // cout << "\nAfter NewDB is copied:\n";
-    // newDB.printDatabase();
-    // newDB.printClassInfo();
-
-    // cout << "After newDB popped front:\n";
-    // newDB.pop_front();
-    // cout << "\ndb:\n";
-    // db.printDatabase();
-    // cout << "\nnewDB:\n";
-    // newDB.printDatabase();
-    // newDB.printClassInfo();
-    // cout << "Searching:" << endl;
-
-    // db.searchID("1");
-    // setColor(LIGHTGRAY);
+    cout << "Exiting ";
+    setColor(CYAN);
+    cout << "<<<  Product Catalog Database  >>>" << endl;
+    setColor(LIGHTGRAY);
 }
 
 void displayMenu() {
@@ -112,31 +89,55 @@ void displayMenu() {
 }
 
 Product getProductInfo(const Database &db) {
-    // Product tmp = {"Testing", "Testing", 10, "Testing", true, "Testing"};
     string category, name, id, description;
     double price;
-    bool status;
-    char tmpStatus;
+    unsigned int quantity;
     cout << "Please enter the product's information:" << endl;
-    cout << "Category: ";
-    getline(cin, category);
-    cout << "Name: ";
-    getline(cin, name);
-    cout << "Price: ";
-    cin >> price;
+    while (true) {
+        cout << "Category: ";
+        getline(cin, category);
+        category = trim(category);
+        if (!(category == "")) break;
+    }
+    category = capitalize(category);
+    while (true) {
+        cout << "Name: ";
+        getline(cin, name);
+        name = trim(name);
+        if (!(name == "")) break;
+    }
+    name = capitalize(name);
+    while (true) {
+        cout << "Price: ";
+        cin >> price;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+        break;
+    }
+    price = abs(price);
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     // cout << "ID: ";
     // getline(cin, id);
     id = generateID(db);
-    cout << "In stock?(y/n): ";
-    cin >> tmpStatus;
+    while (true) {
+        cout << "Quantity: ";
+        cin >> quantity;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+        break;
+    }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    if (tmpStatus == 'y' || tmpStatus == 'Y') status = true;
-    else status = false;
     cout << "Description: ";
     getline(cin, description);
+    description = trim(description);
     if (description == "") description = "No description";
-    Product tmp = {category, name, price, id, status, description};
+    Product tmp = {category, name, price, id, quantity, description};
     return tmp;
 }
 
@@ -144,6 +145,8 @@ string generateID(const Database &db) {
     srand(time(0));
     unsigned long idNum;
     string idStr;
+
+    // loop to create a random ID, range for 0 to the 10^(num of digits), then convert it to string to match the standard format, if this new ID is unique, we return it, otherwise, loop until it finds a unique one
     do {
     idNum = rand() % (int)pow(10, NUMBER_OF_DIGITS_FOR_ID);
     idStr = convertIdToString(idNum);
@@ -152,7 +155,7 @@ string generateID(const Database &db) {
 }
 
 bool uniqueID(string idStr, const Database &db) {
-
+    // search and compare the current id to all the id in the database
     for (int i = db.getStartingIndex(); i <= db.getEndingIndex(); i++) {
         if ((db.getProducts())[i].ID == idStr) return false;
     }
@@ -161,8 +164,34 @@ bool uniqueID(string idStr, const Database &db) {
 
 string convertIdToString(unsigned long idNum) {
     string idStr = to_string(idNum);
+    // add 0 to the front of the ID, until the number of digits match
     while (idStr.length() != NUMBER_OF_DIGITS_FOR_ID) {
         idStr = "0" + idStr;
     }
     return idStr;
 }
+
+string capitalize(string s) {
+    string returnValue;
+    // every character that is the first character, or has a space in front of it get capitalized
+    for (int i = 0; i < s.length(); i++) {
+        if (i == 0 || (s[i-1] == ' ' && isalpha(s[i])))
+            returnValue += toupper(s[i]);
+        else returnValue += s[i];
+    }
+    return returnValue;
+}
+
+// remove white space from the left and the right side of the string
+string trim(string s) {
+    int i = 0;
+    // loop to find the index of first letter in the string
+    while (s[i] == ' ') i++;
+    int j = s.length() - 1;
+    // loop to find the index of last letter in the string
+    while (s[j] == ' ') j--;
+    // return the trimmed string. (j-i+1 because that is the length of the actual string without white space on both sides)
+    return s.substr(i, j-i+1);
+}
+
+
