@@ -14,9 +14,10 @@ string convertIdToString(unsigned long idNum);
 string capitalize(string s);
 string trim(string s);
 
-const unsigned int NUMBER_OF_DIGITS_FOR_ID = 0; // at least 1
+const unsigned int NUMBER_OF_DIGITS_FOR_ID = 7; // will be used to generate random ID
 
 int main() {
+    // clear screen when program starts
     system("cls");
     setColor(CYAN);
     cout << "<<<  Product Catalog Database  >>>" << endl << endl;
@@ -26,6 +27,7 @@ int main() {
     unsigned long id;
     string idStr;
     while (!exit) {
+        // display the menu, and get choice from user
         int choice;
         displayMenu();
         cin >> choice;
@@ -36,13 +38,15 @@ int main() {
                 exit = true;
                 break;
             case 1:
+                // if there are no more unique IDs left, end the program
                 if (db.getSize() == pow(10, NUMBER_OF_DIGITS_FOR_ID) || NUMBER_OF_DIGITS_FOR_ID == 0) {
                     setColor(RED);
-                    cout << "All the IDs have been exhausted! Please increase the number of digits for the ID" << endl;
+                    cout << "There are no more unique IDs! Please increase the number of digits for the ID" << endl;
                     setColor(LIGHTGRAY);
                     exit = true;
                     break;
                 }
+                // clear screen, and then get information about the product, then push it to the database
                 system("cls");
                 product = getProductInfo(db);
                 db.push_back(product);
@@ -51,24 +55,39 @@ int main() {
                 setColor(LIGHTGRAY);
                 break;
             case 2:
+                // if the database is not empty, delete first element, otherwise, display error message and continue
                 if (db.getSize() != 0) {
-                    setColor(RED);
+                    setColor(GREEN);
                     cout << "Deleted the first item in the database" << endl;
                     setColor(LIGHTGRAY);
                 }
                 db.pop_front();
                 break;
             case 3:
-                cout << "Please enter the ID of the item you want to search: ";
-                cin >> id;
+                // get ID from user, while making sure that the ID is numeric values only
+                while (true) {
+                    cout << "Please enter the ID of the item you want to search: ";
+                    cin >> id;
+                    if (cin.fail()) {
+                        cout << "Please enter numeric values only for ID" << endl;
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        continue;
+                    }
+                    break;
+                }
+                // convert numeric ID to string in its standard format
                 idStr = convertIdToString(id);
+                // search for ID
                 db.searchID(idStr);
                 break;
             case 4:
+                // clear screen, then print database
                 system("cls");
                 db.printDatabase();
                 break;
             default:
+                // all other keys besides 0-4 are invalid, will prompty user to enter their choice again
                 setColor(LIGHTRED);
                 cout << "Invalid choice!" << endl;
                 setColor(LIGHTGRAY);
@@ -79,9 +98,11 @@ int main() {
     setColor(CYAN);
     cout << "<<<  Product Catalog Database  >>>" << endl;
     setColor(LIGHTGRAY);
+    return 0;
 }
 
 void displayMenu() {
+    // display the menu with 5 options
     setColor(WHITE);
     cout << "Please choose the following operations:\n\t[1] ADD PRODUCT\n\t[2] REMOVE PRODUCT\n\t[3] SEARCH ITEM\n\t[4] SHOW TABLE\n\t[0] EXIT" << endl;
     cout << "Your choice: ";
@@ -89,6 +110,7 @@ void displayMenu() {
 }
 
 Product getProductInfo(const Database &db) {
+    // get all the information of the product
     string category, name, id, description;
     double price;
     unsigned int quantity;
@@ -96,20 +118,25 @@ Product getProductInfo(const Database &db) {
     while (true) {
         cout << "Category: ";
         getline(cin, category);
+        // remove spaces on both sides of the string
         category = trim(category);
+        // if the trimmed string is not empty, continue, otherwise, prompt for the category again
         if (!(category == "")) break;
     }
     category = capitalize(category);
     while (true) {
         cout << "Name: ";
         getline(cin, name);
+        // remove spaces on both sides of the string
         name = trim(name);
+        // if the trimmed string is not empty, continue, otherwise, prompt for the name again
         if (!(name == "")) break;
     }
     name = capitalize(name);
     while (true) {
         cout << "Price: ";
         cin >> price;
+        // if the user input any characters that are not numeric, we prompt for input again
         if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -119,12 +146,11 @@ Product getProductInfo(const Database &db) {
     }
     price = abs(price);
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    // cout << "ID: ";
-    // getline(cin, id);
     id = generateID(db);
     while (true) {
         cout << "Quantity: ";
         cin >> quantity;
+        // if the user input any characters that are not numeric, we prompt for input again
         if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -135,7 +161,9 @@ Product getProductInfo(const Database &db) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cout << "Description: ";
     getline(cin, description);
+    // remove spaces on both sides of the string
     description = trim(description);
+    // if the string is empty, modify the string to "No description"
     if (description == "") description = "No description";
     Product tmp = {category, name, price, id, quantity, description};
     return tmp;
@@ -148,8 +176,8 @@ string generateID(const Database &db) {
 
     // loop to create a random ID, range for 0 to the 10^(num of digits), then convert it to string to match the standard format, if this new ID is unique, we return it, otherwise, loop until it finds a unique one
     do {
-    idNum = rand() % (int)pow(10, NUMBER_OF_DIGITS_FOR_ID);
-    idStr = convertIdToString(idNum);
+        idNum = rand() % (int)pow(10, NUMBER_OF_DIGITS_FOR_ID);
+        idStr = convertIdToString(idNum);
     } while (!uniqueID(idStr, db));
     return idStr;
 }

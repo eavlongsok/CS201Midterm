@@ -26,14 +26,15 @@ Database::Database() {
     setCapacity(MINIMUM_CAPACITY);
     this->products = new Product[capacity];
     setStartingIndex(0);
-    setEndingindex();
+    setEndingIndex();
 }
 
+// for copying
 Database::Database(const Database& db) {
     *this = db;
 }
 
-// operator overload
+// operator overload (copy)
 Database& Database::operator=(const Database& db) {
     if (this != &db) {
         // copy data members
@@ -44,7 +45,7 @@ Database& Database::operator=(const Database& db) {
         this->setSize(db.getSize());
         this->setCapacity(db.getCapacity());
         this->setStartingIndex(0);
-        this->setEndingindex();
+        this->setEndingIndex();
 
         // a pointer to a new array of products
         Product* tmp = new Product[db.getCapacity()];
@@ -76,43 +77,48 @@ Product* Database::getProducts() const { return this->products; }
 int Database::getStartingIndex() const { return this->startingIndex; }
 void Database::setStartingIndex(int index) { this->startingIndex = index; }
 int Database::getEndingIndex() const { return this->endingIndex; }
-void Database::setEndingindex() { this->endingIndex = getStartingIndex() + getSize() - 1; }
+// no argument for setEndingIndex, it just does some basic calculation
+void Database::setEndingIndex() { this->endingIndex = getStartingIndex() + getSize() - 1; }
 
 // main methods
 void Database::push_back(Product product) {
-    // if capacity reached, then reallocate new memory
+    // if capacity reached, then reallocate to new memory block
     if (this->endingIndex + 1 == this->capacity) {
         reallocateProducts();
     }
 
-    // at an element at index size, then increase size
+    // add an element at the end, then increase size
     setSize(getSize() + 1);
-    setEndingindex();
+    setEndingIndex();
     products[endingIndex] = product;
 }
 
 void Database::pop_front() {
+    // if there's nothing in the database, return
     if (size == 0) {
         setColor(RED);
         std::cout << "There are no item in the database" << std::endl;
         setColor(LIGHTGRAY);
         return;
     }
-    // sendFirstElementToLast();
+    // else we increase the starting index, and decrease size
     setStartingIndex(getStartingIndex() + 1);
     setSize(getSize() - 1);
-    if (getStartingIndex() >= getSize()) {
+    // if the number of deleted elements exceeds the size, and is 1/3 of the capacity then reallocate to new memory block
+    if (getStartingIndex() >= getSize() && getStartingIndex() >= getCapacity() / 3) {
         reallocateProducts();
     }
 }
 
 void Database::printDatabase() {
+    // if database is empty, return
     if (size == 0) {
         setColor(RED);
         std::cout << "There are no item in the database" << std::endl;
         setColor(LIGHTGRAY);
         return;
     }
+    // else print the header, then the rows
     setColor(MAGENTA);
     printHeader();
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
@@ -121,48 +127,44 @@ void Database::printDatabase() {
     setColor(LIGHTGRAY);
 }
 
-
-// void Database::search(int field, std::string targetValue) {
-//     bool found = false;
-//     for (int i = 0; i < getSize(); i++) {
-//         if (toUpperCase(getDataFromFieldAtIndex(field, i)) == toUpperCase(targetValue)){
-//             printProduct(products[i]);
-//             found = true;
-//         }
-//     }
-//     if (!found) std::cout << "Not found" << std::endl;
-// }
-
 void Database::searchID(std::string id) {
+    // search all products in database, if the ID match, then print that product
     for (int i = getStartingIndex(); i <= getStartingIndex() + getSize(); i++) {
         if (products[i].ID == id) {
             printSearchResult(products[i]);
             return;
         }
     }
+    // if not found, pront "not found"
     setColor(LIGHTRED);
     std::cout << "Not found!" << std::endl;
     setColor(LIGHTGRAY);
-    // search(ID, id);
 }
 
-// helper methods
+// helper methods/functions
 void Database::reallocateProducts() {
+    // if there are no more space for new products, then double the capacity
     if (endingIndex + 1 == capacity) setCapacity(getCapacity() * 2);
+    // tmp points to the head of the new array, and current points for the current array head
     Product *tmp = new Product[getCapacity()];
     Product* current = this->products;
 
     for (int i = getStartingIndex(), j = 0; i <= getEndingIndex(); i++, j++) {
+        // copy the product one by one, from current to tmp
         copyProduct(tmp[j], current[i]);
     }
 
+    // delete the products in the current array
     delete[] this->products;
+    // set the head of the array to point to the new array (tmp)
     this->products = tmp;
+    // set the starting index to 0, and calculate the ending index
     setStartingIndex(0);
-    setEndingindex();
+    setEndingIndex();
  }
 
 void copyProduct(Product& destination, const Product& source) {
+    // copy the product information
     destination.category = source.category;
     destination.name = source.name;
     destination.price = source.price;
@@ -177,11 +179,12 @@ void printProduct(const Product &product) {
               << "| " << std::setw(15) << product.price
               << "| " << std::setw(10) << product.ID
               << "| " << std::setw(10) << product.quantity
-              << "| " << std::setw(47) << limitStr(product.description, 45) << "|"
+              << "| " << std::setw(47) << limitStr(product.description, 44) << "|"
               << std::endl;
     std::cout << _SEPARATOR_ << std::endl;
 }
 
+// used only for search function
 void printSearchResult(const Product &product) {
     setColor(GREEN);
     printHeader();
@@ -202,17 +205,15 @@ void printHeader() {
 }
 
 void setColor(Color color) {
+    // set the text in the concole to matcht the color
     SetConsoleTextAttribute(h, color);
 }
 
 std::string limitStr(std::string s, int limit) {
+    // if the length of the string exceeds the limit, then only leave the characters from index 0 to limit - 1, then add "..." to the string
     if (s.length() > limit) {
         s = s.substr(0, limit);
         s += "...";
     }
     return s;
-}
-
-std::string limitDoubleLength(double num) {
-    return std::to_string(num);
 }

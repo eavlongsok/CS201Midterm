@@ -61,18 +61,18 @@ class Database {
         int getStartingIndex() const;
         void setStartingIndex(int index);
         int getEndingIndex() const;
-        void setEndingindex();
+        void setEndingIndex();
 
         // operators overload
         Database& operator=(const Database& db);
 
         // main methods
-        // feature 1
+        // feature #1
         void printDatabase();
-        // feature 2
+        // feature #2
         void push_back(Product product);
         void pop_front();
-        // feature 3
+        // feature #3
         void searchID(std::string id);
 };
 
