@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <limits>
 #include <ctime>
 #include <cmath>
@@ -18,6 +17,7 @@ const unsigned int NUMBER_OF_DIGITS_FOR_ID = 7; // will be used to generate rand
 
 int main() {
     // clear screen when program starts
+    srand(time(0));
     system("cls");
     setColor(CYAN);
     cout << "<<<  Product Catalog Database  >>>" << endl << endl;
@@ -30,9 +30,21 @@ int main() {
         // display the menu, and get choice from user
         int choice;
         displayMenu();
-        cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+        // if the user input any characters that are not numeric, we prompt for input again
+        while (true) {
+            cin >> choice;
+            if (cin.fail()) {
+                setColor(LIGHTRED);
+                cout << "Invalid choice!" << endl;
+                setColor(LIGHTGRAY);
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Your choice: ";
+                continue;
+            }
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            break;
+        }
         switch (choice) {
             case 0:
                 exit = true;
@@ -56,12 +68,12 @@ int main() {
                 break;
             case 2:
                 // if the database is not empty, delete first element, otherwise, display error message and continue
+                db.pop_front();
                 if (db.getSize() != 0) {
                     setColor(GREEN);
                     cout << "Deleted the first item in the database" << endl;
                     setColor(LIGHTGRAY);
                 }
-                db.pop_front();
                 break;
             case 3:
                 // get ID from user, while making sure that the ID is numeric values only
@@ -94,6 +106,7 @@ int main() {
                 break;
         }
     }
+
     cout << "Exiting ";
     setColor(CYAN);
     cout << "<<<  Product Catalog Database  >>>" << endl;
@@ -138,7 +151,7 @@ Product getProductInfo(const Database &db) {
         cin >> price;
         // if the user input any characters that are not numeric, we prompt for input again
         if (cin.fail()) {
-            cin.clear();
+            cin.clear(); // clear the error flag
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
@@ -170,13 +183,12 @@ Product getProductInfo(const Database &db) {
 }
 
 string generateID(const Database &db) {
-    srand(time(0));
     unsigned long idNum;
     string idStr;
 
     // loop to create a random ID, range for 0 to the 10^(num of digits), then convert it to string to match the standard format, if this new ID is unique, we return it, otherwise, loop until it finds a unique one
     do {
-        idNum = rand() % (int)pow(10, NUMBER_OF_DIGITS_FOR_ID);
+        idNum = rand() % (int)pow(10, NUMBER_OF_DIGITS_FOR_ID + 1);
         idStr = convertIdToString(idNum);
     } while (!uniqueID(idStr, db));
     return idStr;

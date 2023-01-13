@@ -35,7 +35,7 @@ enum Color {
 
 class Database {
     private:
-        const static int MINIMUM_CAPACITY = 10;
+        const static int MINIMUM_CAPACITY = 1;
         int size;   // the number of elements
         int capacity;   // the number of elements that can be stored
         int startingIndex;  // the start of the list

@@ -68,6 +68,8 @@ Database::~Database() {
     delete[] products;
 }
 
+
+
 // getters and setters
 int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
@@ -86,8 +88,6 @@ void Database::push_back(Product product) {
     if (this->endingIndex + 1 == this->capacity) {
         reallocateProducts();
     }
-
-    // add an element at the end, then increase size
     setSize(getSize() + 1);
     setEndingIndex();
     products[endingIndex] = product;
@@ -102,11 +102,11 @@ void Database::pop_front() {
         return;
     }
     // else we increase the starting index, and decrease size
-    setStartingIndex(getStartingIndex() + 1);
     setSize(getSize() - 1);
+    setStartingIndex(getStartingIndex() + 1);
     // if the number of deleted elements exceeds the size, and is 1/3 of the capacity then reallocate to new memory block
-    if (getStartingIndex() >= getSize() && getStartingIndex() >= getCapacity() / 3) {
-        reallocateProducts();
+    if (getStartingIndex() + 1 >= getSize()) {
+        reallocateProducts(); // restart website / refresh
     }
 }
 
@@ -129,7 +129,7 @@ void Database::printDatabase() {
 
 void Database::searchID(std::string id) {
     // search all products in database, if the ID match, then print that product
-    for (int i = getStartingIndex(); i <= getStartingIndex() + getSize(); i++) {
+    for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         if (products[i].ID == id) {
             printSearchResult(products[i]);
             return;
@@ -147,7 +147,7 @@ void Database::reallocateProducts() {
     if (endingIndex + 1 == capacity) setCapacity(getCapacity() * 2);
     // tmp points to the head of the new array, and current points for the current array head
     Product *tmp = new Product[getCapacity()];
-    Product* current = this->products;
+    Product *current = this->products;
 
     for (int i = getStartingIndex(), j = 0; i <= getEndingIndex(); i++, j++) {
         // copy the product one by one, from current to tmp
