@@ -1,7 +1,8 @@
+#include <string>
+
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include <string>
 
 // structure of Product
 struct Product {
@@ -35,7 +36,7 @@ enum Color {
 
 class Database {
     private:
-        const static int MINIMUM_CAPACITY = 1;
+        const static int MINIMUM_CAPACITY = 10;
         int size;   // the number of elements
         int capacity;   // the number of elements that can be stored
         int startingIndex;  // the start of the list
@@ -78,4 +79,6 @@ class Database {
 
 // additional function to use in order to change the color of the text in the terminal
 void setColor(Color color);
+
+
 #endif

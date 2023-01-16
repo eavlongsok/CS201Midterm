@@ -69,7 +69,6 @@ Database::~Database() {
 }
 
 
-
 // getters and setters
 int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
@@ -81,6 +80,24 @@ void Database::setStartingIndex(int index) { this->startingIndex = index; }
 int Database::getEndingIndex() const { return this->endingIndex; }
 // no argument for setEndingIndex, it just does some basic calculation
 void Database::setEndingIndex() { this->endingIndex = getStartingIndex() + getSize() - 1; }
+
+
+void Database::printDatabase() {
+    // if database is empty, return
+    if (size == 0) {
+        setColor(RED);
+        std::cout << "There are no item in the database" << std::endl;
+        setColor(LIGHTGRAY);
+        return;
+    }
+    // else print the header, then the rows
+    setColor(MAGENTA);
+    printHeader();
+    for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+        printProduct(this->products[i]);
+    }
+    setColor(LIGHTGRAY);
+}
 
 // main methods
 void Database::push_back(Product product) {
@@ -104,28 +121,15 @@ void Database::pop_front() {
     // else we increase the starting index, and decrease size
     setSize(getSize() - 1);
     setStartingIndex(getStartingIndex() + 1);
-    // if the number of deleted elements exceeds the size, and is 1/3 of the capacity then reallocate to new memory block
+    // if the number of deleted elements exceeds the size, then reallocate to new memory block
     if (getStartingIndex() + 1 >= getSize()) {
-        reallocateProducts(); // restart website / refresh
+        reallocateProducts();
     }
-}
-
-void Database::printDatabase() {
-    // if database is empty, return
-    if (size == 0) {
-        setColor(RED);
-        std::cout << "There are no item in the database" << std::endl;
-        setColor(LIGHTGRAY);
-        return;
-    }
-    // else print the header, then the rows
-    setColor(MAGENTA);
-    printHeader();
-    for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
-        printProduct(this->products[i]);
-    }
+    setColor(GREEN);
+    std::cout << "Deleted the first item in the database" << std::endl;
     setColor(LIGHTGRAY);
 }
+
 
 void Database::searchID(std::string id) {
     // search all products in database, if the ID match, then print that product
@@ -135,7 +139,7 @@ void Database::searchID(std::string id) {
             return;
         }
     }
-    // if not found, pront "not found"
+    // if not found, print "not found"
     setColor(LIGHTRED);
     std::cout << "Not found!" << std::endl;
     setColor(LIGHTGRAY);
@@ -173,11 +177,23 @@ void copyProduct(Product& destination, const Product& source) {
     destination.description = source.description;
 }
 
+void printHeader() {
+    std::cout << _SEPARATOR_ << std::endl;
+    std::cout << std::left << "| " << std::setw(10) << "ID"
+                << "| " << std::setw(22) << "CATEGORY"
+                << "| " << std::setw(26) << "NAME"
+                << "| " << std::setw(15) << "PRICE ($)"
+                << "| " << std::setw(10) << "QUANTITY"
+                << "| " << std::setw(47) << "DESCRIPTION" << "|"
+                << std::endl;
+    std::cout << _SEPARATOR_ << std::endl;
+}
+
 void printProduct(const Product &product) {
-    std::cout << std::left << std::fixed << std::setprecision(2) << "| " << std::setw(22) << limitStr(product.category, 17)
+    std::cout << std::left << std::fixed << std::setprecision(2) << "| " << std::setw(10) << product.ID
+              << "| " << std::setw(22) << limitStr(product.category, 17)
               << "| " << std::setw(26) << limitStr(product.name, 22)
               << "| " << std::setw(15) << product.price
-              << "| " << std::setw(10) << product.ID
               << "| " << std::setw(10) << product.quantity
               << "| " << std::setw(47) << limitStr(product.description, 44) << "|"
               << std::endl;
@@ -192,17 +208,6 @@ void printSearchResult(const Product &product) {
     setColor(LIGHTGRAY);
 }
 
-void printHeader() {
-    std::cout << _SEPARATOR_ << std::endl;
-    std::cout << std::left << "| " << std::setw(22) << "CATEGORY"
-                << "| " << std::setw(26) << "NAME"
-                << "| " << std::setw(15) << "PRICE ($)"
-                << "| " << std::setw(10) << "ID"
-                << "| " << std::setw(10) << "QUANTITY"
-                << "| " << std::setw(47) << "DESCRIPTION" << "|"
-                << std::endl;
-    std::cout << _SEPARATOR_ << std::endl;
-}
 
 void setColor(Color color) {
     // set the text in the concole to matcht the color

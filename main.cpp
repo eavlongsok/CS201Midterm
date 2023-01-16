@@ -69,11 +69,6 @@ int main() {
             case 2:
                 // if the database is not empty, delete first element, otherwise, display error message and continue
                 db.pop_front();
-                if (db.getSize() != 0) {
-                    setColor(GREEN);
-                    cout << "Deleted the first item in the database" << endl;
-                    setColor(LIGHTGRAY);
-                }
                 break;
             case 3:
                 // get ID from user, while making sure that the ID is numeric values only
@@ -99,7 +94,7 @@ int main() {
                 db.printDatabase();
                 break;
             default:
-                // all other keys besides 0-4 are invalid, will prompty user to enter their choice again
+                // all other keys besides 0-4 are invalid, will prompt user to enter their choice again
                 setColor(LIGHTRED);
                 cout << "Invalid choice!" << endl;
                 setColor(LIGHTGRAY);
@@ -159,13 +154,12 @@ Product getProductInfo(const Database &db) {
     }
     price = abs(price);
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    id = generateID(db);
     while (true) {
         cout << "Quantity: ";
         cin >> quantity;
         // if the user input any characters that are not numeric, we prompt for input again
         if (cin.fail()) {
-            cin.clear();
+            cin.clear(); // chear the error flag
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
@@ -178,6 +172,7 @@ Product getProductInfo(const Database &db) {
     description = trim(description);
     // if the string is empty, modify the string to "No description"
     if (description == "") description = "No description";
+    id = generateID(db);
     Product tmp = {category, name, price, id, quantity, description};
     return tmp;
 }
