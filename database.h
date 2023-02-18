@@ -65,7 +65,6 @@ class Database {
         void setStartingIndex(int index);
         int getEndingIndex() const;
         void setEndingIndex();
-        Product at(int index);
 
         // operators overload
         Database& operator=(const Database& db);

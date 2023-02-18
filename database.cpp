@@ -160,6 +160,15 @@ void Database::save() {
     outFile.close();
 }
 
+void Database::load() {
+    std::ifstream inFile(NAME_OF_FILE, std::ios::in);
+    std::string row;
+    while (std::getline(inFile, row)) {
+        if (row.empty()) continue;
+        push_back(parseCSVRow(row));
+    }
+}
+
 // helper methods/functions
 void Database::reallocateProducts() {
     // if there are no more space for new products, then double the capacity
@@ -216,10 +225,7 @@ Product Database::parseCSVRow(std::string row) {
 }
 
 std::string Database::stringifyProduct(Product product) {
-    std::string s = "\"" + product.category + "\", " + "\"" + product.name + "\", " + std::to_string(product.price) + ", " + "\"" + product.ID +
-                    "\", "
-                    "\"" +
-                    product.description + "\"";
+    std::string s = "\"" + product.category + "\", " + "\"" + product.name + "\", " + std::to_string(product.price) + ", " + "\"" + product.ID + "\", " + std::to_string(product.quantity) + ", " +"\"" + product.description + "\"";
 
     return s;
 }
@@ -274,7 +280,19 @@ std::string limitStr(std::string s, int limit) {
     return s;
 }
 
+// std::string trim(std::string s) {
+//     int i = 0;
+//     // loop to find the index of first letter in the string
+//     while (s[i] == ' ') i++;
+//     int j = s.length() - 1;
+//     // loop to find the index of last letter in the string
+//     while (s[j] == ' ' || s[j] == '\n') j--;
+//     // return the trimmed string. (j-i+1 because that is the length of the actual string without white space on both sides)
+//     return s.substr(i, j-i+1);
+// }
+
 void setColor(Color color) {
     // set the text in the concole to matcht the color
     SetConsoleTextAttribute(h, color);
 }
+

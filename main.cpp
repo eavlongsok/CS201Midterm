@@ -29,6 +29,7 @@ int main() {
     cout << "<<<  Product Catalog Database  >>>" << endl << endl;
     bool exit = false;
     Database db;
+    db.load();
     Product product;
     unsigned long id;
     string idStr;
