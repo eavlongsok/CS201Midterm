@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <Windows.h>
 #include <stdlib.h>
+#include <fstream>
 #include "database.h"
 
 // the line seperator
@@ -145,6 +146,20 @@ void Database::searchID(std::string id) {
     setColor(LIGHTGRAY);
 }
 
+void Database::save() {
+    std::ofstream outFile(NAME_OF_FILE, std::ios::out);
+    std::cout << getStartingIndex() << getEndingIndex() << std::endl;
+    for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+        Product product = products[i];
+        std::cout << "Added a row" << std::endl;
+        outFile << stringifyProduct(product) << "\n";
+    }
+    setColor(GREEN);
+    std::cout << "Saved to database.csv" << std::endl;
+    setColor(LIGHTGRAY);
+    outFile.close();
+}
+
 // helper methods/functions
 void Database::reallocateProducts() {
     // if there are no more space for new products, then double the capacity
@@ -166,6 +181,48 @@ void Database::reallocateProducts() {
     setStartingIndex(0);
     setEndingIndex();
  }
+
+Product Database::parseCSVRow(std::string row) {
+    bool openQuote = false;
+    int start = 0;
+    int end = -1;
+    std::string fields[6];
+    int count = 0;
+    for (int i = 0; i < row.length(); i++) {
+        if (row[i] == '"') openQuote = !openQuote;
+        if (!openQuote && (row[i] == ',' || i == row.length()-1)) {
+            end = i;
+            if (i == row.length() - 1) end++;
+            fields[count++] = row.substr(start, end - start);
+            start = end + 2;
+        }
+    }
+
+    for (int i = 0; i < 6; i++) {
+        if (fields[i][0] == '"') fields[i] = fields[i].substr(1);
+        int length = fields[i].length();
+        if (fields[i][length-1] == '"') fields[i] = fields[i].substr(0, length - 1);
+    }
+
+    std::string category = fields[0];
+    std::string name = fields[1];
+    double price = std::stod(fields[2]);
+    std::string ID = fields[3];
+    unsigned int quantity = std::stoi(fields[4]);
+    std::string description = fields[5];
+
+    Product product = {category, name, price, ID, quantity, description};
+    return product;
+}
+
+std::string Database::stringifyProduct(Product product) {
+    std::string s = "\"" + product.category + "\", " + "\"" + product.name + "\", " + std::to_string(product.price) + ", " + "\"" + product.ID +
+                    "\", "
+                    "\"" +
+                    product.description + "\"";
+
+    return s;
+}
 
 void copyProduct(Product& destination, const Product& source) {
     // copy the product information
@@ -208,12 +265,6 @@ void printSearchResult(const Product &product) {
     setColor(LIGHTGRAY);
 }
 
-
-void setColor(Color color) {
-    // set the text in the concole to matcht the color
-    SetConsoleTextAttribute(h, color);
-}
-
 std::string limitStr(std::string s, int limit) {
     // if the length of the string exceeds the limit, then only leave the characters from index 0 to limit - 1, then add "..." to the string
     if (s.length() > limit) {
@@ -221,4 +272,9 @@ std::string limitStr(std::string s, int limit) {
         s += "...";
     }
     return s;
+}
+
+void setColor(Color color) {
+    // set the text in the concole to matcht the color
+    SetConsoleTextAttribute(h, color);
 }

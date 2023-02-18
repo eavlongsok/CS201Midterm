@@ -31,3 +31,6 @@
 *.out
 *.app
 .vscode/settings.json
+
+testing.cpp
+test.csv

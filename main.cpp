@@ -3,13 +3,19 @@
 #include <ctime>
 #include <cmath>
 #include "database.h"
+#include <fstream>
 using namespace std;
 
+// general functions
 void displayMenu();
 Product getProductInfo(const Database &db);
+
+// for ID generation
 string generateID(const Database &db);
 bool uniqueID(string idStr, const Database &db);
 string convertIdToString(unsigned long idNum);
+
+// for formatting the inputs
 string capitalize(string s);
 string trim(string s);
 
@@ -64,11 +70,13 @@ int main() {
                 db.push_back(product);
                 setColor(GREEN);
                 cout << "Item added to database" << endl;
+                db.save();
                 setColor(LIGHTGRAY);
                 break;
             case 2:
                 // if the database is not empty, delete first element, otherwise, display error message and continue
                 db.pop_front();
+                db.save();
                 break;
             case 3:
                 // get ID from user, while making sure that the ID is numeric values only
@@ -228,5 +236,4 @@ string trim(string s) {
     // return the trimmed string. (j-i+1 because that is the length of the actual string without white space on both sides)
     return s.substr(i, j-i+1);
 }
-
 

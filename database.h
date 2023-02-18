@@ -3,7 +3,7 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-
+const std::string NAME_OF_FILE = "database.csv";
 // structure of Product
 struct Product {
     std::string category;
@@ -44,8 +44,10 @@ class Database {
         Product *products;   // pointer to array
         // helper methods
         void reallocateProducts();
+        Product parseCSVRow(std::string row);
+        std::string stringifyProduct(Product product);
 
-    public:
+       public:
         // constructor
         Database();
         Database(const Database& db);
@@ -63,6 +65,7 @@ class Database {
         void setStartingIndex(int index);
         int getEndingIndex() const;
         void setEndingIndex();
+        Product at(int index);
 
         // operators overload
         Database& operator=(const Database& db);
@@ -75,6 +78,11 @@ class Database {
         void pop_front();
         // feature #3
         void searchID(std::string id);
+
+        // feature #5
+        void save();
+        void load();
+
 };
 
 // additional function to use in order to change the color of the text in the terminal
