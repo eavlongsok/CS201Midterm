@@ -14,7 +14,6 @@ const HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 // helper functions declaration
 void copyProduct(Product &destination, const Product &source);
 void printProduct(const Product &product);
-void printSearchResult(const Product &product);
 void printHeader();
 // to limit the length of string in the output
 std::string limitStr(std::string s, int limit);
@@ -132,18 +131,16 @@ void Database::pop_front() {
 }
 
 
-void Database::searchID(std::string id) {
+Product Database::searchID(std::string id) {
     // search all products in database, if the ID match, then print that product
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         if (products[i].ID == id) {
-            printSearchResult(products[i]);
-            return;
+            return products[i];
         }
     }
-    // if not found, print "not found"
-    setColor(LIGHTRED);
-    std::cout << "Not found!" << std::endl;
-    setColor(LIGHTGRAY);
+    // if not found, throw invalid_argument exception
+
+    throw std::invalid_argument("Product Not Found");
 }
 
 void Database::save() {
@@ -264,7 +261,7 @@ void printProduct(const Product &product) {
 }
 
 // used only for search function
-void printSearchResult(const Product &product) {
+void Database::printRow(const Product &product) {
     setColor(GREEN);
     printHeader();
     printProduct(product);
@@ -279,17 +276,6 @@ std::string limitStr(std::string s, int limit) {
     }
     return s;
 }
-
-// std::string trim(std::string s) {
-//     int i = 0;
-//     // loop to find the index of first letter in the string
-//     while (s[i] == ' ') i++;
-//     int j = s.length() - 1;
-//     // loop to find the index of last letter in the string
-//     while (s[j] == ' ' || s[j] == '\n') j--;
-//     // return the trimmed string. (j-i+1 because that is the length of the actual string without white space on both sides)
-//     return s.substr(i, j-i+1);
-// }
 
 void setColor(Color color) {
     // set the text in the concole to matcht the color

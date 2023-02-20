@@ -95,7 +95,15 @@ int main() {
                 // convert numeric ID to string in its standard format
                 idStr = convertIdToString(id);
                 // search for ID
-                db.searchID(idStr);
+                try {
+                    Product tmp = db.searchID(idStr);
+                    db.printRow(tmp);
+                }
+                catch (invalid_argument e) {
+                    setColor(LIGHTRED);
+                    std::cout << e.what() << std::endl;
+                    setColor(LIGHTGRAY);
+                }
                 break;
             case 4:
                 // clear screen, then print database

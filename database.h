@@ -76,7 +76,8 @@ class Database {
         void push_back(Product product);
         void pop_front();
         // feature #3
-        void searchID(std::string id);
+        Product searchID(std::string id);
+        void printRow(const Product &product);
 
         // feature #5
         void save();
