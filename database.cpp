@@ -175,9 +175,7 @@ void Database::load(std::string fileName) {
     if (this->getSize() != 0) {
         save(TEMPORARY_FILE_NAME);
         Database* temp = new Database();
-        std::cout << "Before swapping: this:" << this << std::endl;
         swapPointer(this, temp);
-        std::cout << "After swapping: this:" << this << std::endl;
         delete temp;
     }
     // validate fileName
@@ -327,9 +325,7 @@ void setColor(Color color) {
 }
 
 void swapPointer(Database* a, Database* b) {
-    std::cout << "Before swapping: a:" << a << " b:" << b << std::endl;
     Database* tmp = a;
-    a = b;
-    b = tmp;
-    std::cout << "After swapping: a:" << a << " b:" << b << std::endl;
+    *a = *b;
+    *b = *tmp;
 }
