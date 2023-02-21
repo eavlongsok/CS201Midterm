@@ -29,7 +29,6 @@ int main() {
     cout << "<<<  Product Catalog Database  >>>" << endl << endl;
     bool exit = false;
     Database db;
-    db.load();
     Product product;
     unsigned long id;
     string idStr;
@@ -71,13 +70,11 @@ int main() {
                 db.push_back(product);
                 setColor(GREEN);
                 cout << "Item added to database" << endl;
-                db.save();
                 setColor(LIGHTGRAY);
                 break;
             case 2:
                 // if the database is not empty, delete first element, otherwise, display error message and continue
                 db.pop_front();
-                db.save();
                 break;
             case 3:
                 // get ID from user, while making sure that the ID is numeric values only
@@ -110,6 +107,24 @@ int main() {
                 system("cls");
                 db.printDatabase();
                 break;
+            case 5:
+                // load
+                {
+                    string fileName;
+                    cout << "Enter CSV file name: ";
+                    getline(cin, fileName);
+                    db.load(fileName);
+                }
+                break;
+            case 6:
+                // save
+                {
+                    string fileName;
+                    cout << "Enter CSV file name: ";
+                    getline(cin, fileName);
+                    db.save(fileName);
+                    break;
+                }
             default:
                 // all other keys besides 0-4 are invalid, will prompt user to enter their choice again
                 setColor(LIGHTRED);
@@ -129,7 +144,7 @@ int main() {
 void displayMenu() {
     // display the menu with 5 options
     setColor(WHITE);
-    cout << "Please choose the following operations:\n\t[1] ADD PRODUCT\n\t[2] REMOVE PRODUCT\n\t[3] SEARCH ITEM\n\t[4] SHOW TABLE\n\t[0] EXIT" << endl;
+    cout << "Please choose the following operations:\n\t[1] ADD PRODUCT\n\t[2] REMOVE PRODUCT\n\t[3] SEARCH ITEM\n\t[4] SHOW TABLE\n\t[5] LOAD DATABASE\n\t[6] SAVE DATABASE\n\t[0] EXIT" << endl;
     cout << "Your choice: ";
     setColor(LIGHTGRAY);
 }
@@ -245,4 +260,3 @@ string trim(string s) {
     // return the trimmed string. (j-i+1 because that is the length of the actual string without white space on both sides)
     return s.substr(i, j-i+1);
 }
-

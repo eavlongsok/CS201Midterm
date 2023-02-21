@@ -3,7 +3,8 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-const std::string NAME_OF_FILE = "database.csv";
+const std::string TEMPORARY_FILE_NAME = "__temporary__.csv";
+
 // structure of Product
 struct Product {
     std::string category;
@@ -80,8 +81,8 @@ class Database {
         void printRow(const Product &product);
 
         // feature #5
-        void save();
-        void load();
+        void save(std::string fileName);
+        void load(std::string fileName);
 
 };
 

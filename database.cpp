@@ -17,7 +17,8 @@ void printProduct(const Product &product);
 void printHeader();
 // to limit the length of string in the output
 std::string limitStr(std::string s, int limit);
-
+void swapPointer(Database* a, Database* b);
+std::string toLowerCase(std::string s);
 
 // constructors
 Database::Database() {
@@ -143,8 +144,21 @@ Product Database::searchID(std::string id) {
     throw std::invalid_argument("Product Not Found");
 }
 
-void Database::save() {
-    std::ofstream outFile(NAME_OF_FILE, std::ios::out);
+void Database::save(std::string fileName) {
+    if (this->getSize() == 0) {
+        setColor(RED);
+        std::cout << "The database is empty. Please add some data to save" << std::endl;
+        setColor(LIGHTGRAY);
+        return;
+    }
+    if (fileName.empty()) throw std::invalid_argument("Unable to access. File name is empty.");
+    fileName = toLowerCase(fileName);
+    if (fileName.length() < 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
+    std::ofstream outFile(fileName, std::ios::out);
+    if (!outFile) {
+        std::cout << "Cannot open file. Please try again." << std::endl;
+        return;
+    }
     std::cout << getStartingIndex() << getEndingIndex() << std::endl;
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         Product product = products[i];
@@ -152,18 +166,40 @@ void Database::save() {
         outFile << stringifyProduct(product) << "\n";
     }
     setColor(GREEN);
-    std::cout << "Saved to database.csv" << std::endl;
+    std::cout << "Successfully saved to " << fileName << "." << std::endl;
     setColor(LIGHTGRAY);
     outFile.close();
 }
 
-void Database::load() {
-    std::ifstream inFile(NAME_OF_FILE, std::ios::in);
+void Database::load(std::string fileName) {
+    if (this->getSize() != 0) {
+        save(TEMPORARY_FILE_NAME);
+        Database* temp = new Database();
+        std::cout << "Before swapping: this:" << this << std::endl;
+        swapPointer(this, temp);
+        std::cout << "After swapping: this:" << this << std::endl;
+        delete temp;
+    }
+    // validate fileName
+    if (fileName.empty()) throw std::invalid_argument("Unable to access. File name is empty.");
+    fileName = toLowerCase(fileName);
+    if (fileName.length() < 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
+    std::ifstream inFile(fileName, std::ios::in);
+    if (!inFile) {
+        setColor(RED);
+        std::cout << "File does not exist. Please try again." << std::endl;
+        setColor(LIGHTGRAY);
+        return;
+    }
     std::string row;
     while (std::getline(inFile, row)) {
         if (row.empty()) continue;
         push_back(parseCSVRow(row));
     }
+
+    setColor(GREEN);
+    std::cout << "Successfully loaded the database." << std::endl;
+    setColor(LIGHTGRAY);
 }
 
 // helper methods/functions
@@ -277,8 +313,23 @@ std::string limitStr(std::string s, int limit) {
     return s;
 }
 
+std::string toLowerCase(std::string s) {
+    std::string result;
+    for (const char &c: s) {
+        result += tolower(c);
+    }
+    return result;
+}
+
 void setColor(Color color) {
     // set the text in the concole to matcht the color
     SetConsoleTextAttribute(h, color);
 }
 
+void swapPointer(Database* a, Database* b) {
+    std::cout << "Before swapping: a:" << a << " b:" << b << std::endl;
+    Database* tmp = a;
+    a = b;
+    b = tmp;
+    std::cout << "After swapping: a:" << a << " b:" << b << std::endl;
+}
