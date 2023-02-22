@@ -32,6 +32,7 @@ int main() {
     Product product;
     unsigned long id;
     string idStr;
+    string fileName;
     while (!exit) {
         // display the menu, and get choice from user
         int choice;
@@ -56,6 +57,11 @@ int main() {
                 exit = true;
                 break;
             case 1:
+                // clear screen, then print database
+                system("cls");
+                db.printDatabase();
+                break;
+            case 2:
                 // if there are no more unique IDs left, end the program
                 if (db.getSize() == pow(10, NUMBER_OF_DIGITS_FOR_ID) || NUMBER_OF_DIGITS_FOR_ID == 0) {
                     setColor(RED);
@@ -72,11 +78,18 @@ int main() {
                 cout << "Item added to database" << endl;
                 setColor(LIGHTGRAY);
                 break;
-            case 2:
+            case 3:
                 // if the database is not empty, delete first element, otherwise, display error message and continue
                 db.pop_front();
                 break;
-            case 3:
+            case 4:
+                int id;
+                cout << "Please enter the ID of the product you want to modify: ";
+                cin >> id;
+                idStr = convertIdToString(id);
+                db.modify(idStr);
+                break;
+            case 5:
                 // get ID from user, while making sure that the ID is numeric values only
                 while (true) {
                     cout << "Please enter the ID of the item you want to search: ";
@@ -102,29 +115,24 @@ int main() {
                     setColor(LIGHTGRAY);
                 }
                 break;
-            case 4:
-                // clear screen, then print database
-                system("cls");
+            case 6:
+                db.ascendingSort();
                 db.printDatabase();
                 break;
-            case 5:
-                // load
-                {
-                    string fileName;
-                    cout << "Enter CSV file name: ";
-                    getline(cin, fileName);
-                    db.load(fileName);
-                }
+            case 7:
+                db.descendingSort();
+                db.printDatabase();
                 break;
-            case 6:
-                // save
-                {
-                    string fileName;
-                    cout << "Enter CSV file name: ";
-                    getline(cin, fileName);
-                    db.save(fileName);
-                    break;
-                }
+            case 8:
+                cout << "Enter CSV file name: ";
+                getline(cin, fileName);
+                db.load(fileName);
+                break;
+            case 9:
+                cout << "Enter CSV file name: ";
+                getline(cin, fileName);
+                db.save(fileName);
+                break;
             default:
                 // all other keys besides 0-4 are invalid, will prompt user to enter their choice again
                 setColor(LIGHTRED);
@@ -144,7 +152,7 @@ int main() {
 void displayMenu() {
     // display the menu with 5 options
     setColor(WHITE);
-    cout << "Please choose the following operations:\n\t[1] ADD PRODUCT\n\t[2] REMOVE PRODUCT\n\t[3] SEARCH ITEM\n\t[4] SHOW TABLE\n\t[5] LOAD DATABASE\n\t[6] SAVE DATABASE\n\t[0] EXIT" << endl;
+    cout << "Please choose the following operations:\n\t[1] SHOW TABLE\n\t[2] ADD PRODUCT\n\t[3] REMOVE PRODUCT\n\t[4] MODIFY PRODUCT\n\t[5] SEARCH PRODUCT\n\t[6] SORT DATABASE (ASCENDING)\n\t[7] SORT DATABASE (DESCENDING)\n\t[8] LOAD DATABASE\n\t[9] SAVE DATABASE\n\t[0] EXIT" << endl;
     cout << "Your choice: ";
     setColor(LIGHTGRAY);
 }

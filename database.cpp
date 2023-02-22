@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cctype>
 #include <iomanip>
+#include <limits>
 #include <Windows.h>
 #include <stdlib.h>
 #include <fstream>
@@ -19,6 +20,7 @@ void printHeader();
 std::string limitStr(std::string s, int limit);
 void swapPointer(Database* a, Database* b);
 std::string toLowerCase(std::string s);
+void displayModifyMenu();
 
 // constructors
 Database::Database() {
@@ -69,7 +71,6 @@ Database::~Database() {
     delete[] products;
 }
 
-
 // getters and setters
 int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
@@ -87,7 +88,7 @@ void Database::printDatabase() {
     // if database is empty, return
     if (size == 0) {
         setColor(RED);
-        std::cout << "There are no item in the database" << std::endl;
+        std::cout << "There are no item in the database" << std::endl << std::endl;
         setColor(LIGHTGRAY);
         return;
     }
@@ -126,11 +127,11 @@ void Database::pop_front() {
     if (getStartingIndex() + 1 >= getSize()) {
         reallocateProducts();
     }
+    system("cls");
     setColor(GREEN);
-    std::cout << "Deleted the first item in the database" << std::endl;
+    std::cout << "Deleted the first item in the database" << std::endl << std::endl;
     setColor(LIGHTGRAY);
 }
-
 
 Product Database::searchID(std::string id) {
     // search all products in database, if the ID match, then print that product
@@ -142,6 +143,73 @@ Product Database::searchID(std::string id) {
     // if not found, throw invalid_argument exception
 
     throw std::invalid_argument("Product Not Found");
+}
+
+void Database::modify(std::string id){
+    Product product = searchID(id);
+    system("cls");
+    printRow(product);
+    displayModifyMenu();
+    int choice;
+    std::cin >> choice;
+    switch (choice) {
+        case 1:
+            std::cout << "Enter the new Category: ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            getline(std::cin, product.category);
+            break;
+
+        case 2:
+            std::cout << "Enter the new Name: ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            getline(std::cin, product.name);
+            break;
+
+        case 3:
+            std::cout << "Enter the new Price: ";
+            std::cin >> product.price;
+            break;
+
+        case 4:
+            std::cout << "Enter the new Quantity: ";
+            std::cin >> product.quantity;
+            break;
+
+        case 5:
+            std::cout << "Enter the new Description: ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            getline(std::cin, product.description);
+            break;
+
+        case 6:
+            std::cout << "Enter the new Category: ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            getline(std::cin, product.category);
+            std::cout << "Enter the new Name: ";
+            getline(std::cin, product.name);
+            std::cout << "Enter the new Price: ";
+            std::cin >> product.price;
+            std::cout << "Enter the new Quantity: ";
+            std::cin >> product.quantity;
+            std::cout << "Enter the new Description: ";
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            getline(std::cin, product.description);
+            break;
+
+        default:
+            setColor(LIGHTRED);
+            std::cout << "Invalid choice!" << std::endl;
+            setColor(LIGHTGRAY);
+            break;
+    }
+
+    for (int i = getStartingIndex(); i<= getEndingIndex(); i++){
+        if (products[i].ID == id){
+            products[i] = product;
+            printRow(product);
+            return;
+        }
+    }
 }
 
 void Database::save(std::string fileName) {
@@ -162,11 +230,10 @@ void Database::save(std::string fileName) {
     std::cout << getStartingIndex() << getEndingIndex() << std::endl;
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         Product product = products[i];
-        std::cout << "Added a row" << std::endl;
         outFile << stringifyProduct(product) << "\n";
     }
     setColor(GREEN);
-    std::cout << "Successfully saved to " << fileName << "." << std::endl;
+    std::cout << "Successfully saved " << this->getSize() << " rows to " << fileName << "." << std::endl << std::endl;
     setColor(LIGHTGRAY);
     outFile.close();
 }
@@ -195,9 +262,38 @@ void Database::load(std::string fileName) {
         push_back(parseCSVRow(row));
     }
 
+    system("cls");
     setColor(GREEN);
-    std::cout << "Successfully loaded the database." << std::endl;
+    std::cout << "Successfully loaded " << this->getSize() << " rows to the database." << std::endl << std::endl;
     setColor(LIGHTGRAY);
+}
+
+void Database:: ascendingSort() {
+  for (int step = getStartingIndex(); step <= getEndingIndex(); step++) {
+    std::string key = products[step].ID;
+    int j = step - 1;
+
+    // Compare key with each element on the left until an element smaller than it is found
+    while (key < products[j].ID && j >= 0) {
+      products[j + 1].ID = products[j].ID;
+      j--;
+    }
+    products[j + 1].ID = key;
+  }
+}
+
+void Database:: descendingSort(){
+    for (int step = getStartingIndex(); step <= getEndingIndex(); step++) {
+    std::string key = products[step].ID;
+    int j = step - 1;
+
+    // Compare key with each element on the left until an element bigger than it is found
+    while (key > products[j].ID && j >= 0) {
+      products[j + 1].ID = products[j].ID;
+      j--;
+    }
+    products[j + 1].ID = key;
+  }
 }
 
 // helper methods/functions
@@ -220,7 +316,14 @@ void Database::reallocateProducts() {
     // set the starting index to 0, and calculate the ending index
     setStartingIndex(0);
     setEndingIndex();
- }
+}
+
+// Display Menu
+void displayModifyMenu() {
+    int choice;
+    // display the menu with 7 options for modifying product
+    std::cout << "Please choose the following operations to modify the data:\n\t[1] CATEGORY\n\t[2] NAME\n\t[3] PRICE\n\t[4] QUANTITY\n\t[5] DESCRIPTION\n\t[6] ENTIRE ROW\n\t[0] EXIT\nYour choice: ";
+}
 
 Product Database::parseCSVRow(std::string row) {
     bool openQuote = false;

@@ -73,16 +73,25 @@ class Database {
         // main methods
         // feature #1
         void printDatabase();
+
         // feature #2
         void push_back(Product product);
         void pop_front();
+
         // feature #3
         Product searchID(std::string id);
         void printRow(const Product &product);
 
+        // feature #4
+        void modify(std::string id);
+
         // feature #5
         void save(std::string fileName);
         void load(std::string fileName);
+
+        // feature #6
+        void ascendingSort();
+        void descendingSort();
 
 };
 
