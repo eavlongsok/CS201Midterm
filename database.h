@@ -4,6 +4,7 @@
 #define DATABASE_H
 
 const std::string TEMPORARY_FILE_NAME = "__temporary__.csv";
+const unsigned int NUMBER_OF_DIGITS_FOR_ID = 7; // will be used to generate random ID
 
 // structure of Product
 struct Product {
@@ -93,6 +94,10 @@ class Database {
         void ascendingSort();
         void descendingSort();
 
+        // helper functions for main
+        Product getProductInfo(std::string idStr = "");
+        std::string generateID();
+        bool uniqueID(std::string idStr);
 };
 
 // additional function to use in order to change the color of the text in the terminal

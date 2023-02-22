@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include "database.h"
+#include <cmath>
 
 // the line seperator
 const std::string _SEPARATOR_ = "+" + std::string(141, '-') + "+";
@@ -18,6 +19,9 @@ void printProduct(const Product &product);
 void printHeader();
 // to limit the length of string in the output
 std::string limitStr(std::string s, int limit);
+std::string capitalize(std::string s);
+std::string trim(std::string s);
+std::string convertIdToString(unsigned long idNum);
 void swapPointer(Database* a, Database* b);
 std::string toLowerCase(std::string s);
 void displayModifyMenu();
@@ -55,7 +59,7 @@ Database& Database::operator=(const Database& db) {
 
         for (int i = db.getStartingIndex(), j = 0; i <= db.getEndingIndex(); i++, j++) {
             // copy a field at a time
-            copyProduct(tmp[j], db.products[i]);
+            tmp[j] = products[i];
         }
 
         // delete previous data of this object and set it to point to new data
@@ -182,18 +186,8 @@ void Database::modify(std::string id){
             break;
 
         case 6:
-            std::cout << "Enter the new Category: ";
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            getline(std::cin, product.category);
-            std::cout << "Enter the new Name: ";
-            getline(std::cin, product.name);
-            std::cout << "Enter the new Price: ";
-            std::cin >> product.price;
-            std::cout << "Enter the new Quantity: ";
-            std::cin >> product.quantity;
-            std::cout << "Enter the new Description: ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            getline(std::cin, product.description);
+            product = getProductInfo(id);
             break;
 
         default:
@@ -269,30 +263,32 @@ void Database::load(std::string fileName) {
 }
 
 void Database:: ascendingSort() {
-  for (int step = getStartingIndex(); step <= getEndingIndex(); step++) {
-    std::string key = products[step].ID;
-    int j = step - 1;
+  for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+    Product currentProduct = products[i];
+    std::string currentID = currentProduct.ID;
+    int j = i - 1;
 
-    // Compare key with each element on the left until an element smaller than it is found
-    while (key < products[j].ID && j >= 0) {
-      products[j + 1].ID = products[j].ID;
+    // Compare currentID with each element on the left until an element smaller than it is found
+    while (currentID < products[j].ID && j >= 0) {
+      products[j + 1] = products[j];
       j--;
     }
-    products[j + 1].ID = key;
+    products[j + 1] = currentProduct;
   }
 }
 
 void Database:: descendingSort(){
-    for (int step = getStartingIndex(); step <= getEndingIndex(); step++) {
-    std::string key = products[step].ID;
-    int j = step - 1;
+      for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+    Product currentProduct = products[i];
+    std::string currentID = currentProduct.ID;
+    int j = i - 1;
 
-    // Compare key with each element on the left until an element bigger than it is found
-    while (key > products[j].ID && j >= 0) {
-      products[j + 1].ID = products[j].ID;
+    // Compare currentID with each element on the left until an element smaller than it is found
+    while (currentID > products[j].ID && j >= 0) {
+      products[j + 1] = products[j];
       j--;
     }
-    products[j + 1].ID = key;
+    products[j + 1] = currentProduct;
   }
 }
 
@@ -306,7 +302,7 @@ void Database::reallocateProducts() {
 
     for (int i = getStartingIndex(), j = 0; i <= getEndingIndex(); i++, j++) {
         // copy the product one by one, from current to tmp
-        copyProduct(tmp[j], current[i]);
+        tmp[j] = products[i];
     }
 
     // delete the products in the current array
@@ -364,6 +360,67 @@ std::string Database::stringifyProduct(Product product) {
     return s;
 }
 
+Product Database::getProductInfo(std::string idStr) {
+    // get all the information of the product
+    std::string category, name, id, description;
+    double price;
+    unsigned int quantity;
+    std::cout << "Please enter the product's information:" << std::endl;
+    while (true) {
+        std::cout << "Category: ";
+        getline(std::cin, category);
+        // remove spaces on both sides of the string
+        category = trim(category);
+        // if the trimmed string is not empty, continue, otherwise, prompt for the category again
+        if (!(category == "")) break;
+    }
+    category = capitalize(category);
+    while (true) {
+        std::cout << "Name: ";
+        getline(std::cin, name);
+        // remove spaces on both sides of the string
+        name = trim(name);
+        // if the trimmed string is not empty, continue, otherwise, prompt for the name again
+        if (!(name == "")) break;
+    }
+    name = capitalize(name);
+    while (true) {
+        std::cout << "Price: ";
+        std::cin >> price;
+        // if the user input any characters that are not numeric, we prompt for input again
+        if (std::cin.fail()) {
+            std::cin.clear(); // clear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+        break;
+    }
+    price = abs(price);
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    while (true) {
+        std::cout << "Quantity: ";
+        std::cin >> quantity;
+        // if the user input any characters that are not numeric, we prompt for input again
+        if (std::cin.fail()) {
+            std::cin.clear(); // chear the error flag
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+        break;
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Description: ";
+    getline(std::cin, description);
+    // remove spaces on both sides of the string
+    description = trim(description);
+    // if the string is empty, modify the string to "No description"
+    if (description == "") description = "No description";
+    if (idStr.length() == 0) id = generateID();
+    else id = idStr;
+    Product tmp = {category, name, price, id, quantity, description};
+    return tmp;
+}
+
 void copyProduct(Product& destination, const Product& source) {
     // copy the product information
     destination.category = source.category;
@@ -412,6 +469,58 @@ std::string limitStr(std::string s, int limit) {
         s += "...";
     }
     return s;
+}
+
+std::string Database::generateID() {
+    unsigned long idNum;
+    std::string idStr;
+
+    // loop to create a random ID, range for 0 to the 10^(num of digits), then convert it to string to match the standard format, if this new ID is unique, we return it, otherwise, loop until it finds a unique one
+    do {
+        idNum = rand() % (int)std::pow(10, NUMBER_OF_DIGITS_FOR_ID + 1);
+        idStr = convertIdToString(idNum);
+    } while (!this->uniqueID(idStr));
+    return idStr;
+}
+
+bool Database::uniqueID(std::string idStr) {
+    // search and compare the current id to all the id in the database
+    for (int i = this->getStartingIndex(); i <= this->getEndingIndex(); i++) {
+        if ((this->getProducts())[i].ID == idStr) return false;
+    }
+    return true;
+}
+
+std::string convertIdToString(unsigned long idNum) {
+    std::string idStr = std::to_string(idNum);
+    // add 0 to the front of the ID, until the number of digits match
+    while (idStr.length() != NUMBER_OF_DIGITS_FOR_ID) {
+        idStr = "0" + idStr;
+    }
+    return idStr;
+}
+
+std::string capitalize(std::string s) {
+    std::string returnValue;
+    // every character that is the first character, or has a space in front of it get capitalized
+    for (int i = 0; i < s.length(); i++) {
+        if (i == 0 || (s[i-1] == ' ' && isalpha(s[i])))
+            returnValue += toupper(s[i]);
+        else returnValue += s[i];
+    }
+    return returnValue;
+}
+
+// remove white space from the left and the right side of the string
+std::string trim(std::string s) {
+    int i = 0;
+    // loop to find the index of first letter in the string
+    while (s[i] == ' ') i++;
+    int j = s.length() - 1;
+    // loop to find the index of last letter in the string
+    while (s[j] == ' ') j--;
+    // return the trimmed string. (j-i+1 because that is the length of the actual string without white space on both sides)
+    return s.substr(i, j-i+1);
 }
 
 std::string toLowerCase(std::string s) {
