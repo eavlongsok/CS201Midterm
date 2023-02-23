@@ -79,6 +79,7 @@ int main() {
                 db.pop_front();
                 break;
             case 4:
+                // if there is no product in database, display message and stop
                 if (db.getSize() == 0) {
                     system("cls");
                     setColor(RED);
@@ -86,8 +87,11 @@ int main() {
                     setColor(WHITE);
                     break;
                 }
+
                 while (true) {
+                    // ask user for ID, then search it in database to modify it
                     cout << "\nPlease enter the ID of the product you want to modify: ";
+                    // get ID from user, with validation
                     cin >> id;
                     if (cin.fail()) {
                         cout << "Please enter numeric values only for ID" << endl;
@@ -100,19 +104,24 @@ int main() {
                         cout << "Please enter positive numbers only.";
                     }
                 }
+
                 // convert numeric ID to string in its standard format
                 idStr = convertIdToString(id);
+
+                // run modify method, if there's no product, then the exception will be thrown
                 try {
                     db.modify(idStr);
                 }
+                // catch the exception and print the message
                 catch (invalid_argument e) {
                     setColor(LIGHTRED);
                     cout << e.what() << endl;
                     setColor(WHITE);
                 }
                 break;
+
             case 5:
-                // get ID from user, while making sure that the ID is numeric values only
+                // if there's no product, display the message and stop
                 if (db.getSize() == 0) {
                     system("cls");
                     setColor(RED);
@@ -120,6 +129,7 @@ int main() {
                     setColor(WHITE);
                     break;
                 }
+                // get ID from user, while making sure that the ID is numeric values only
                 while (true) {
                     cout << "\nPlease enter the ID of the item you want to search: ";
                     cin >> id;
@@ -136,32 +146,41 @@ int main() {
                 }
                 // convert numeric ID to string in its standard format
                 idStr = convertIdToString(id);
-                // search for ID
+                // search for ID, if ID doesn't exist, this will throw exception, if ID exists, this will print the product found
                 try {
                     system("cls");
                     const Product& tmp = db.searchID(idStr);
                     Database::printRow(tmp);
                 }
+                // catch the exception and print the message
                 catch (invalid_argument e) {
                     setColor(LIGHTRED);
                     cout << e.what() << endl;
                     setColor(WHITE);
                 }
                 break;
+
             case 6:
+                // ascending sort
                 db.ascendingSort();
                 db.printDatabase();
                 break;
+
             case 7:
+                // descending sort
                 db.descendingSort();
                 db.printDatabase();
                 break;
+
             case 8:
+                // get file name from user to load the data
                 cout << "\nEnter CSV file name: ";
                 getline(cin, fileName);
                 db.load(fileName);
                 break;
+
             case 9:
+                // if the database is empty, then we can't save
                 if (db.getSize() == 0) {
                     system("cls");
                     setColor(RED);
@@ -169,10 +188,13 @@ int main() {
                     setColor(WHITE);
                     break;
                 }
+
+                // get file name from user to save the data
                 cout << "\nEnter CSV file name: ";
                 getline(cin, fileName);
                 db.save(fileName);
                 break;
+
             default:
                 // all other keys besides 0-4 are invalid, will prompt user to enter their choice again
                 setColor(LIGHTRED);

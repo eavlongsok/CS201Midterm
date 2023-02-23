@@ -77,7 +77,6 @@ Database::~Database() {
     delete[] products;
 }
 
-
 // getters and setters
 int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
@@ -90,7 +89,7 @@ int Database::getEndingIndex() const { return this->endingIndex; }
 // no argument for setEndingIndex, it just does some basic calculation
 void Database::setEndingIndex() { this->endingIndex = getStartingIndex() + getSize() - 1; }
 
-
+// feature #1
 void Database::printDatabase() {
     // if database is empty, return
     if (size == 0) {
@@ -108,7 +107,15 @@ void Database::printDatabase() {
     setColor(WHITE);
 }
 
-// main methods
+// feature #1
+void Database::printRow(const Product &product) {
+    setColor(GREEN);
+    printHeader();
+    printProduct(product);
+    setColor(WHITE);
+}
+
+// feature #2
 void Database::push_back(Product product) {
     // if capacity reached, then reallocate to new memory block
     if (this->endingIndex + 1 == this->capacity) {
@@ -119,6 +126,7 @@ void Database::push_back(Product product) {
     products[endingIndex] = product;
 }
 
+// feature #2
 void Database::pop_front() {
     // if there's nothing in the database, return
     if (size == 0) {
@@ -140,6 +148,7 @@ void Database::pop_front() {
     setColor(WHITE);
 }
 
+// feature #3
 Product& Database::searchID(std::string id) {
     // search all products in database, if the ID match, then print that product
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
@@ -152,10 +161,15 @@ Product& Database::searchID(std::string id) {
     throw std::invalid_argument("Product Not Found");
 }
 
+// feature #4
 void Database::modify(std::string id){
+    // search for the ID in the database, if not found, it will throw exception, which we then catch in main function
+    // if found, searchID(id) will return a reference to the product in the database, so that if any changes were made here, it will change the product in the array as well
+    // by returning a reference, the searchID will return the actual product in the database(its location, similar to a pointer), and we can access the product in the database in here
     Product& product = searchID(id);
     bool exit = false;
     bool invalidInput = false;
+    // always display menu, if the user make change to only 1 attribute, if the uesr chose to stop modify (by choosing 0), or the user modified the entire row, then we will stop this loop
     while (!exit) {
         if (!invalidInput) {
             system("cls");
@@ -163,6 +177,7 @@ void Database::modify(std::string id){
             displayModifyMenu();
         }
         invalidInput = false;
+        // get the choice/operation from the user + validation
         int choice;
         while (true) {
             std::cin >> choice;
@@ -175,15 +190,16 @@ void Database::modify(std::string id){
                 std::cout << "Your choice: ";
                 continue;
             }
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             break;
         }
+
         switch (choice) {
             case 0:
                 exit = true;
                 system("cls");
-                return;
+                break;
             case 1:
+                // modify category + validation
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 while (true) {
                     std::cout << "Enter the new Category: ";
@@ -197,6 +213,7 @@ void Database::modify(std::string id){
                 break;
 
             case 2:
+                // modify name + validation
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 while (true) {
                     std::cout << "Enter the new Name: ";
@@ -210,6 +227,7 @@ void Database::modify(std::string id){
                 break;
 
             case 3:
+                // modify price + validation
                 while (true) {
                     std::cout << "Enter the new Price: ";
                     std::cin >> product.price;
@@ -221,10 +239,12 @@ void Database::modify(std::string id){
                     }
                     break;
                 }
+                // price is always positive
                 product.price = abs(product.price);
                 break;
 
             case 4:
+                // modify quantity + validation
                 while (true) {
                     std::cout << "Enter the new Quantity: ";
                     std::cin >> product.quantity;
@@ -236,10 +256,12 @@ void Database::modify(std::string id){
                     }
                     break;
                 }
+                // quantity is always positive
                 product.quantity = abs(product.quantity);
                 break;
 
             case 5:
+                // modify description + validation
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Enter the new Description: ";
                 getline(std::cin, product.description);
@@ -250,17 +272,20 @@ void Database::modify(std::string id){
                 break;
 
             case 6:
+                // modify entire row
+                system("cls");
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 product = getProductInfo(id);
                 exit = true;
                 break;
 
             default:
+                // if the choice is invalid, display invalid choice
                 setColor(LIGHTRED);
                 std::cout << "Invalid choice!" << std::endl;
                 setColor(WHITE);
-                setColor(WHITE);
                 std::cout << "Your choice: ";
+                // invalidInput here is used to make the display look nicer
                 invalidInput = true;
                 break;
         }
@@ -268,37 +293,53 @@ void Database::modify(std::string id){
     }
 }
 
+// feature #5
 void Database::save(std::string fileName) {
-    if (fileName.empty()) throw std::invalid_argument("Unable to access. File name is empty.");
+    // if fileName is an empty string, throw an exception
+    if (fileName.empty()) throw std::invalid_argument("Unable to open. File name is empty.");
     fileName = toLowerCase(fileName);
-    if (fileName.length() < 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
+
+    // figure out if we should at .csv to the end of the string, since we support both input types ("name.csv" and just "name")
+    if (fileName.length() <= 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
+
+    // open the file, and check if we can open it
     std::ofstream outFile(fileName, std::ios::out);
     if (!outFile) {
         std::cout << "Cannot open file. Please try again." << std::endl;
         return;
     }
+
+    // loop through all the products in the database, then convert them into string, then put them in the output csv file
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         Product product = products[i];
         outFile << stringifyProduct(product) << "\n";
     }
+
     system("cls");
     setColor(GREEN);
-    std::cout << "Successfully saved " << this->getSize() << " rows to " << fileName << "." << std::endl << std::endl;
+    std::cout << "Successfully saved " << this->getSize() << " rows to " << fileName << std::endl << std::endl;
     setColor(WHITE);
     outFile.close();
 }
 
+// feature #5
 void Database::load(std::string fileName) {
+    // if database has some information before loading, then the program saves it to a temporary file, and then load the new file
     if (this->getSize() != 0) {
         save(TEMPORARY_FILE_NAME);
         Database* temp = new Database();
         swapPointer(this, temp);
         delete temp;
     }
-    // validate fileName
-    if (fileName.empty()) throw std::invalid_argument("Unable to access. File name is empty.");
+
+    // if fileName is an empty string, throw an exception
+    if (fileName.empty()) throw std::invalid_argument("Unable to open. File name is empty.");
     fileName = toLowerCase(fileName);
-    if (fileName.length() < 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
+
+    // figure out if we should at .csv to the end of the string, since we support both input types ("name.csv" and just "name")
+    if (fileName.length() <= 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
+
+    // open the file, and check if we can open it
     std::ifstream inFile(fileName, std::ios::in);
     if (!inFile) {
         system("cls");
@@ -307,6 +348,8 @@ void Database::load(std::string fileName) {
         setColor(WHITE);
         return;
     }
+
+    // get data from csv file row by row, as string initially, then we parse each row using parseCSVRow() function, then push back to database
     std::string row;
     while (std::getline(inFile, row)) {
         if (row.empty()) continue;
@@ -522,14 +565,6 @@ void printProduct(const Product &product) {
               << "| " << std::setw(47) << limitStr(product.description, 44) << "|"
               << std::endl;
     std::cout << _SEPARATOR_ << std::endl;
-}
-
-// used only for search function
-void Database::printRow(const Product &product) {
-    setColor(GREEN);
-    printHeader();
-    printProduct(product);
-    setColor(WHITE);
 }
 
 std::string limitStr(std::string s, int limit) {

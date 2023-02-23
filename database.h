@@ -75,13 +75,14 @@ class Database {
         // main methods
         // feature #1
         void printDatabase();
+        static void printRow(const Product &product);
 
         // feature #2
         void push_back(Product product);
         void pop_front();
 
         // feature #3
-        Product &searchID(std::string id);
+        Product& searchID(std::string id);
 
         // feature #4
         void modify(std::string id);
@@ -98,12 +99,7 @@ class Database {
         Product getProductInfo(std::string idStr = "");
         std::string generateID();
         bool uniqueID(std::string idStr);
-
-        static void printRow(const Product &product);
 };
 
-// additional function to use in order to change the color of the text in the terminal
 void setColor(Color color);
-
-
 #endif
