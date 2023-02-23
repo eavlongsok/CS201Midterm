@@ -15,7 +15,6 @@ const std::string _SEPARATOR_ = "+" + std::string(141, '-') + "+";
 const HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 
 // helper functions declaration
-void copyProduct(Product &destination, const Product &source);
 void printProduct(const Product &product);
 void printHeader();
 
@@ -366,15 +365,19 @@ void Database:: ascendingSort() {
     auto now = std::chrono::system_clock::now();
 
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+        // currentProduct is the main product to compare to others
         Product currentProduct = products[i];
         std::string currentID = currentProduct.ID;
+        // start comparing on the left side of ucurrentProduct
         int j = i - 1;
 
-        // Compare currentID with each element on the left until an element smaller than it is found
+        // Compare currentID with each element on the left until an element with ID smaller than it is found
         while (currentID < products[j].ID && j >= 0) {
+            // make the product on the right as the left one
             products[j + 1] = products[j];
             j--;
         }
+        // make the products at the last index compared to be the currentProduct
         products[j + 1] = currentProduct;
     }
     auto end = std::chrono::system_clock::now();
@@ -386,15 +389,18 @@ void Database:: ascendingSort() {
 void Database:: descendingSort(){
     auto now = std::chrono::system_clock::now();
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+        // currentProduct is the main product to compare to others
         Product currentProduct = products[i];
         std::string currentID = currentProduct.ID;
+        // start comparing on the left side of ucurrentProduct
         int j = i - 1;
 
-        // Compare currentID with each element on the left until an element smaller than it is found
+        // Compare currentID with each element on the left until an element with ID smaller than it is found
         while (currentID > products[j].ID && j >= 0) {
-        products[j + 1] = products[j];
-        j--;
+            products[j + 1] = products[j];
+            j--;
         }
+        // make the products at the last index compared to be the currentProduct
         products[j + 1] = currentProduct;
     }
     auto end = std::chrono::system_clock::now();
@@ -434,27 +440,34 @@ void displayModifyMenu() {
 }
 
 Product Database::parseCSVRow(std::string row) {
+    // check for quotes and commas
     bool openQuote = false;
     int start = 0;
     int end = -1;
     std::string fields[6];
     int count = 0;
+    // loop throught the string "row"
     for (int i = 0; i < row.length(); i++) {
+        // if string at index i is a double quote ("), then toggle the openQuote bool
         if (row[i] == '"') openQuote = !openQuote;
+        // if there is no open quotes, and at index i, there's a comma or i is the last index
         if (!openQuote && (row[i] == ',' || i == row.length()-1)) {
             end = i;
             if (i == row.length() - 1) end++;
+            // create a substring from the starting index, to the ending index, that substring is our data
             fields[count++] = row.substr(start, end - start);
             start = end + 2;
         }
     }
 
+    // remove the double quote from the string
     for (int i = 0; i < 6; i++) {
         if (fields[i][0] == '"') fields[i] = fields[i].substr(1);
         int length = fields[i].length();
         if (fields[i][length-1] == '"') fields[i] = fields[i].substr(0, length - 1);
     }
 
+    // assign each field of the product
     std::string category = fields[0];
     std::string name = fields[1];
     double price = std::stod(fields[2]);
@@ -467,6 +480,7 @@ Product Database::parseCSVRow(std::string row) {
 }
 
 std::string Database::stringifyProduct(Product product) {
+    // convert the product data to string, to be stored in csv file
     std::string s = "\"" + product.category + "\", " + "\"" + product.name + "\", " + std::to_string(product.price) + ", " + "\"" + product.ID + "\", " + std::to_string(product.quantity) + ", " +"\"" + product.description + "\"";
 
     return s;
@@ -532,16 +546,6 @@ Product Database::getProductInfo(std::string idStr) {
     else id = idStr;
     Product tmp = {category, name, price, id, quantity, description};
     return tmp;
-}
-
-void copyProduct(Product& destination, const Product& source) {
-    // copy the product information
-    destination.category = source.category;
-    destination.name = source.name;
-    destination.price = source.price;
-    destination.ID = source.ID;
-    destination.quantity = source.quantity;
-    destination.description = source.description;
 }
 
 void printHeader() {
