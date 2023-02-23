@@ -45,6 +45,7 @@ int main() {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             break;
         }
+
         switch (choice) {
             case 0:
                 exit = true;
@@ -106,7 +107,7 @@ int main() {
                 }
                 catch (invalid_argument e) {
                     setColor(LIGHTRED);
-                    std::cout << e.what() << std::endl;
+                    cout << e.what() << endl;
                     setColor(WHITE);
                 }
                 break;
@@ -137,12 +138,13 @@ int main() {
                 idStr = convertIdToString(id);
                 // search for ID
                 try {
+                    system("cls");
                     const Product& tmp = db.searchID(idStr);
                     Database::printRow(tmp);
                 }
                 catch (invalid_argument e) {
                     setColor(LIGHTRED);
-                    std::cout << e.what() << std::endl;
+                    cout << e.what() << endl;
                     setColor(WHITE);
                 }
                 break;

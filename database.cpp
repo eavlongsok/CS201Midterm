@@ -7,6 +7,7 @@
 #include <fstream>
 #include "database.h"
 #include <cmath>
+#include <chrono>
 
 // the line seperator
 const std::string _SEPARATOR_ = "+" + std::string(141, '-') + "+";
@@ -154,12 +155,29 @@ Product& Database::searchID(std::string id) {
 void Database::modify(std::string id){
     Product& product = searchID(id);
     bool exit = false;
+    bool invalidInput = false;
     while (!exit) {
-        system("cls");
-        Database::printRow(product);
-        displayModifyMenu();
+        if (!invalidInput) {
+            system("cls");
+            Database::printRow(product);
+            displayModifyMenu();
+        }
+        invalidInput = false;
         int choice;
-        std::cin >> choice;
+        while (true) {
+            std::cin >> choice;
+            if (std::cin.fail()) {
+                setColor(LIGHTRED);
+                std::cout << "Invalid choice!" << std::endl;
+                setColor(WHITE);
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Your choice: ";
+                continue;
+            }
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break;
+        }
         switch (choice) {
             case 0:
                 exit = true;
@@ -229,7 +247,6 @@ void Database::modify(std::string id){
                 product.description = trim(product.description);
                 // if the string is empty, modify the string to "No description"
                 if (product.description == "") product.description = "No description";
-
                 break;
 
             case 6:
@@ -242,10 +259,12 @@ void Database::modify(std::string id){
                 setColor(LIGHTRED);
                 std::cout << "Invalid choice!" << std::endl;
                 setColor(WHITE);
+                setColor(WHITE);
+                std::cout << "Your choice: ";
+                invalidInput = true;
                 break;
         }
-
-        Database::printRow(product);
+        if (!invalidInput)  Database::printRow(product);
     }
 }
 
@@ -301,33 +320,44 @@ void Database::load(std::string fileName) {
 }
 
 void Database:: ascendingSort() {
-  for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
-    Product currentProduct = products[i];
-    std::string currentID = currentProduct.ID;
-    int j = i - 1;
+    auto now = std::chrono::system_clock::now();
 
-    // Compare currentID with each element on the left until an element smaller than it is found
-    while (currentID < products[j].ID && j >= 0) {
-      products[j + 1] = products[j];
-      j--;
+    for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+        Product currentProduct = products[i];
+        std::string currentID = currentProduct.ID;
+        int j = i - 1;
+
+        // Compare currentID with each element on the left until an element smaller than it is found
+        while (currentID < products[j].ID && j >= 0) {
+            products[j + 1] = products[j];
+            j--;
+        }
+        products[j + 1] = currentProduct;
     }
-    products[j + 1] = currentProduct;
-  }
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - now;
+    system("cls");
+    std::cout << "Sorted " << this->getSize() << " items in " << elapsed_seconds.count() * 1000 << "ms\n";
 }
 
 void Database:: descendingSort(){
-      for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
-    Product currentProduct = products[i];
-    std::string currentID = currentProduct.ID;
-    int j = i - 1;
+    auto now = std::chrono::system_clock::now();
+    for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
+        Product currentProduct = products[i];
+        std::string currentID = currentProduct.ID;
+        int j = i - 1;
 
-    // Compare currentID with each element on the left until an element smaller than it is found
-    while (currentID > products[j].ID && j >= 0) {
-      products[j + 1] = products[j];
-      j--;
+        // Compare currentID with each element on the left until an element smaller than it is found
+        while (currentID > products[j].ID && j >= 0) {
+        products[j + 1] = products[j];
+        j--;
+        }
+        products[j + 1] = currentProduct;
     }
-    products[j + 1] = currentProduct;
-  }
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - now;
+    system("cls");
+    std::cout << "Sorted " << this->getSize() << " items in " << elapsed_seconds.count() * 1000 << "ms\n";
 }
 
 // helper methods/functions
