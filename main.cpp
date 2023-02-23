@@ -15,15 +15,15 @@ string capitalize(string s);
 string trim(string s);
 
 int main() {
-    // clear screen when program starts
     srand(time(0));
+    // clear screen when program starts
     system("cls");
     setColor(CYAN);
     cout << "<<<  Product Catalog Database  >>>" << endl << endl;
     bool exit = false;
     Database db;
     Product product;
-    unsigned long id;
+    long id;
     string idStr;
     string fileName;
     while (!exit) {
@@ -36,7 +36,7 @@ int main() {
             if (cin.fail()) {
                 setColor(LIGHTRED);
                 cout << "Invalid choice!" << endl;
-                setColor(LIGHTGRAY);
+                setColor(WHITE);
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "Your choice: ";
@@ -59,7 +59,7 @@ int main() {
                 if (db.getSize() == pow(10, NUMBER_OF_DIGITS_FOR_ID) || NUMBER_OF_DIGITS_FOR_ID == 0) {
                     setColor(RED);
                     cout << "There are no more unique IDs! Please increase the number of digits for the ID" << endl;
-                    setColor(LIGHTGRAY);
+                    setColor(WHITE);
                     exit = true;
                     break;
                 }
@@ -67,17 +67,26 @@ int main() {
                 system("cls");
                 product = db.getProductInfo();
                 db.push_back(product);
+                system("cls");
                 setColor(GREEN);
                 cout << "Item added to database" << endl;
-                setColor(LIGHTGRAY);
+                Database::printRow(product);
+                setColor(WHITE);
                 break;
             case 3:
                 // if the database is not empty, delete first element, otherwise, display error message and continue
                 db.pop_front();
                 break;
             case 4:
+                if (db.getSize() == 0) {
+                    system("cls");
+                    setColor(RED);
+                    cout << "There are no products in the database" << endl << endl;
+                    setColor(WHITE);
+                    break;
+                }
                 while (true) {
-                    cout << "Please enter the ID of the product you want to modify: ";
+                    cout << "\nPlease enter the ID of the product you want to modify: ";
                     cin >> id;
                     if (cin.fail()) {
                         cout << "Please enter numeric values only for ID" << endl;
@@ -98,13 +107,20 @@ int main() {
                 catch (invalid_argument e) {
                     setColor(LIGHTRED);
                     std::cout << e.what() << std::endl;
-                    setColor(LIGHTGRAY);
+                    setColor(WHITE);
                 }
                 break;
             case 5:
                 // get ID from user, while making sure that the ID is numeric values only
+                if (db.getSize() == 0) {
+                    system("cls");
+                    setColor(RED);
+                    cout << "There are no products in the database" << endl << endl;
+                    setColor(WHITE);
+                    break;
+                }
                 while (true) {
-                    cout << "Please enter the ID of the item you want to search: ";
+                    cout << "\nPlease enter the ID of the item you want to search: ";
                     cin >> id;
                     if (cin.fail()) {
                         cout << "Please enter numeric values only for ID" << endl;
@@ -112,19 +128,22 @@ int main() {
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         continue;
                     }
-                    break;
+                    if (id >= 0) break;
+                    else {
+                        cout << "Please enter positive numbers only.";
+                    }
                 }
                 // convert numeric ID to string in its standard format
                 idStr = convertIdToString(id);
                 // search for ID
                 try {
-                    Product tmp = db.searchID(idStr);
-                    db.printRow(tmp);
+                    const Product& tmp = db.searchID(idStr);
+                    Database::printRow(tmp);
                 }
                 catch (invalid_argument e) {
                     setColor(LIGHTRED);
                     std::cout << e.what() << std::endl;
-                    setColor(LIGHTGRAY);
+                    setColor(WHITE);
                 }
                 break;
             case 6:
@@ -136,12 +155,19 @@ int main() {
                 db.printDatabase();
                 break;
             case 8:
-                cout << "Enter CSV file name: ";
+                cout << "\nEnter CSV file name: ";
                 getline(cin, fileName);
                 db.load(fileName);
                 break;
             case 9:
-                cout << "Enter CSV file name: ";
+                if (db.getSize() == 0) {
+                    system("cls");
+                    setColor(RED);
+                    cout << "The database is empty. Please add some data to save" << endl << endl;
+                    setColor(WHITE);
+                    break;
+                }
+                cout << "\nEnter CSV file name: ";
                 getline(cin, fileName);
                 db.save(fileName);
                 break;
@@ -149,7 +175,7 @@ int main() {
                 // all other keys besides 0-4 are invalid, will prompt user to enter their choice again
                 setColor(LIGHTRED);
                 cout << "Invalid choice!" << endl;
-                setColor(LIGHTGRAY);
+                setColor(WHITE);
                 break;
         }
     }
@@ -166,5 +192,4 @@ void displayMenu() {
     setColor(WHITE);
     cout << "Please choose the following operations:\n\t[1] SHOW TABLE\n\t[2] ADD PRODUCT\n\t[3] REMOVE PRODUCT\n\t[4] MODIFY PRODUCT\n\t[5] SEARCH PRODUCT\n\t[6] SORT DATABASE (ASCENDING)\n\t[7] SORT DATABASE (DESCENDING)\n\t[8] LOAD DATABASE\n\t[9] SAVE DATABASE\n\t[0] EXIT" << endl;
     cout << "Your choice: ";
-    setColor(LIGHTGRAY);
 }

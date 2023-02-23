@@ -4,7 +4,8 @@
 #define DATABASE_H
 
 const std::string TEMPORARY_FILE_NAME = "__temporary__.csv";
-const unsigned int NUMBER_OF_DIGITS_FOR_ID = 7; // will be used to generate random ID
+const unsigned int NUMBER_OF_DIGITS_FOR_ID = 5; // will be used to generate random ID
+// note: the random function has maximum digit of 5
 
 // structure of Product
 struct Product {
@@ -12,7 +13,7 @@ struct Product {
     std::string name;
     double price;
     std::string ID;
-    unsigned int quantity;
+    int quantity;
     std::string description;
 };
 
@@ -80,8 +81,7 @@ class Database {
         void pop_front();
 
         // feature #3
-        Product searchID(std::string id);
-        void printRow(const Product &product);
+        Product &searchID(std::string id);
 
         // feature #4
         void modify(std::string id);
@@ -94,10 +94,12 @@ class Database {
         void ascendingSort();
         void descendingSort();
 
-        // helper functions for main
+        // helper functions for main + general helper functions
         Product getProductInfo(std::string idStr = "");
         std::string generateID();
         bool uniqueID(std::string idStr);
+
+        static void printRow(const Product &product);
 };
 
 // additional function to use in order to change the color of the text in the terminal

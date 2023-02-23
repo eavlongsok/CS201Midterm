@@ -17,6 +17,7 @@ const HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 void copyProduct(Product &destination, const Product &source);
 void printProduct(const Product &product);
 void printHeader();
+
 // to limit the length of string in the output
 std::string limitStr(std::string s, int limit);
 std::string capitalize(std::string s);
@@ -75,6 +76,7 @@ Database::~Database() {
     delete[] products;
 }
 
+
 // getters and setters
 int Database::getSize() const { return this->size; }
 int Database::getCapacity() const { return this->capacity; }
@@ -92,8 +94,8 @@ void Database::printDatabase() {
     // if database is empty, return
     if (size == 0) {
         setColor(RED);
-        std::cout << "There are no item in the database" << std::endl << std::endl;
-        setColor(LIGHTGRAY);
+        std::cout << "There are no products in the database" << std::endl << std::endl;
+        setColor(WHITE);
         return;
     }
     // else print the header, then the rows
@@ -102,7 +104,7 @@ void Database::printDatabase() {
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         printProduct(this->products[i]);
     }
-    setColor(LIGHTGRAY);
+    setColor(WHITE);
 }
 
 // main methods
@@ -121,7 +123,7 @@ void Database::pop_front() {
     if (size == 0) {
         setColor(RED);
         std::cout << "There are no item in the database" << std::endl;
-        setColor(LIGHTGRAY);
+        setColor(WHITE);
         return;
     }
     // else we increase the starting index, and decrease size
@@ -134,10 +136,10 @@ void Database::pop_front() {
     system("cls");
     setColor(GREEN);
     std::cout << "Deleted the first item in the database" << std::endl << std::endl;
-    setColor(LIGHTGRAY);
+    setColor(WHITE);
 }
 
-Product Database::searchID(std::string id) {
+Product& Database::searchID(std::string id) {
     // search all products in database, if the ID match, then print that product
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         if (products[i].ID == id) {
@@ -150,69 +152,104 @@ Product Database::searchID(std::string id) {
 }
 
 void Database::modify(std::string id){
-    Product product = searchID(id);
-    system("cls");
-    printRow(product);
-    displayModifyMenu();
-    int choice;
-    std::cin >> choice;
-    switch (choice) {
-        case 1:
-            std::cout << "Enter the new Category: ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            getline(std::cin, product.category);
-            break;
+    Product& product = searchID(id);
+    bool exit = false;
+    while (!exit) {
+        system("cls");
+        Database::printRow(product);
+        displayModifyMenu();
+        int choice;
+        std::cin >> choice;
+        switch (choice) {
+            case 0:
+                exit = true;
+                system("cls");
+                return;
+            case 1:
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                while (true) {
+                    std::cout << "Enter the new Category: ";
+                    getline(std::cin, product.category);
+                    // remove spaces on both sides of the string
+                    product.category = trim(product.category);
+                    // if the trimmed string is not empty, continue, otherwise, prompt for the category again
+                    if (!(product.category == "")) break;
+                }
+                product.category = capitalize(product.category);
+                break;
 
-        case 2:
-            std::cout << "Enter the new Name: ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            getline(std::cin, product.name);
-            break;
+            case 2:
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                while (true) {
+                    std::cout << "Enter the new Name: ";
+                    getline(std::cin, product.name);
+                    // remove spaces on both sides of the string
+                    product.name = trim(product.name);
+                    // if the trimmed string is not empty, continue, otherwise, prompt for the name again
+                    if (!(product.name == "")) break;
+                }
+                product.name = capitalize(product.name);
+                break;
 
-        case 3:
-            std::cout << "Enter the new Price: ";
-            std::cin >> product.price;
-            break;
+            case 3:
+                while (true) {
+                    std::cout << "Enter the new Price: ";
+                    std::cin >> product.price;
+                    // if the user input any characters that are not numeric, we prompt for input again
+                    if (std::cin.fail()) {
+                        std::cin.clear(); // clear the error flag
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        continue;
+                    }
+                    break;
+                }
+                product.price = abs(product.price);
+                break;
 
-        case 4:
-            std::cout << "Enter the new Quantity: ";
-            std::cin >> product.quantity;
-            break;
+            case 4:
+                while (true) {
+                    std::cout << "Enter the new Quantity: ";
+                    std::cin >> product.quantity;
+                    // if the user input any characters that are not numeric, we prompt for input again
+                    if (std::cin.fail()) {
+                        std::cin.clear(); // chear the error flag
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        continue;
+                    }
+                    break;
+                }
+                product.quantity = abs(product.quantity);
+                break;
 
-        case 5:
-            std::cout << "Enter the new Description: ";
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            getline(std::cin, product.description);
-            break;
+            case 5:
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Enter the new Description: ";
+                getline(std::cin, product.description);
+                // remove spaces on both sides of the string
+                product.description = trim(product.description);
+                // if the string is empty, modify the string to "No description"
+                if (product.description == "") product.description = "No description";
 
-        case 6:
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            product = getProductInfo(id);
-            break;
+                break;
 
-        default:
-            setColor(LIGHTRED);
-            std::cout << "Invalid choice!" << std::endl;
-            setColor(LIGHTGRAY);
-            break;
-    }
+            case 6:
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                product = getProductInfo(id);
+                exit = true;
+                break;
 
-    for (int i = getStartingIndex(); i<= getEndingIndex(); i++){
-        if (products[i].ID == id){
-            products[i] = product;
-            printRow(product);
-            return;
+            default:
+                setColor(LIGHTRED);
+                std::cout << "Invalid choice!" << std::endl;
+                setColor(WHITE);
+                break;
         }
+
+        Database::printRow(product);
     }
 }
 
 void Database::save(std::string fileName) {
-    if (this->getSize() == 0) {
-        setColor(RED);
-        std::cout << "The database is empty. Please add some data to save" << std::endl;
-        setColor(LIGHTGRAY);
-        return;
-    }
     if (fileName.empty()) throw std::invalid_argument("Unable to access. File name is empty.");
     fileName = toLowerCase(fileName);
     if (fileName.length() < 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
@@ -221,14 +258,14 @@ void Database::save(std::string fileName) {
         std::cout << "Cannot open file. Please try again." << std::endl;
         return;
     }
-    std::cout << getStartingIndex() << getEndingIndex() << std::endl;
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         Product product = products[i];
         outFile << stringifyProduct(product) << "\n";
     }
+    system("cls");
     setColor(GREEN);
     std::cout << "Successfully saved " << this->getSize() << " rows to " << fileName << "." << std::endl << std::endl;
-    setColor(LIGHTGRAY);
+    setColor(WHITE);
     outFile.close();
 }
 
@@ -245,9 +282,10 @@ void Database::load(std::string fileName) {
     if (fileName.length() < 4 || fileName.substr(fileName.length() - 4) != ".csv") fileName += ".csv";
     std::ifstream inFile(fileName, std::ios::in);
     if (!inFile) {
+        system("cls");
         setColor(RED);
         std::cout << "File does not exist. Please try again." << std::endl;
-        setColor(LIGHTGRAY);
+        setColor(WHITE);
         return;
     }
     std::string row;
@@ -258,8 +296,8 @@ void Database::load(std::string fileName) {
 
     system("cls");
     setColor(GREEN);
-    std::cout << "Successfully loaded " << this->getSize() << " rows to the database." << std::endl << std::endl;
-    setColor(LIGHTGRAY);
+    std::cout << "Successfully loaded " << this->getSize() << " rows from " << fileName << std::endl << std::endl;
+    setColor(WHITE);
 }
 
 void Database:: ascendingSort() {
@@ -316,6 +354,7 @@ void Database::reallocateProducts() {
 
 // Display Menu
 void displayModifyMenu() {
+    setColor(WHITE);
     int choice;
     // display the menu with 7 options for modifying product
     std::cout << "Please choose the following operations to modify the data:\n\t[1] CATEGORY\n\t[2] NAME\n\t[3] PRICE\n\t[4] QUANTITY\n\t[5] DESCRIPTION\n\t[6] ENTIRE ROW\n\t[0] EXIT\nYour choice: ";
@@ -347,7 +386,7 @@ Product Database::parseCSVRow(std::string row) {
     std::string name = fields[1];
     double price = std::stod(fields[2]);
     std::string ID = fields[3];
-    unsigned int quantity = std::stoi(fields[4]);
+    int quantity = std::stoi(fields[4]);
     std::string description = fields[5];
 
     Product product = {category, name, price, ID, quantity, description};
@@ -364,7 +403,7 @@ Product Database::getProductInfo(std::string idStr) {
     // get all the information of the product
     std::string category, name, id, description;
     double price;
-    unsigned int quantity;
+    int quantity;
     std::cout << "Please enter the product's information:" << std::endl;
     while (true) {
         std::cout << "Category: ";
@@ -396,7 +435,7 @@ Product Database::getProductInfo(std::string idStr) {
         break;
     }
     price = abs(price);
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
     while (true) {
         std::cout << "Quantity: ";
         std::cin >> quantity;
@@ -408,6 +447,7 @@ Product Database::getProductInfo(std::string idStr) {
         }
         break;
     }
+    quantity = abs(quantity);
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Description: ";
     getline(std::cin, description);
@@ -459,7 +499,7 @@ void Database::printRow(const Product &product) {
     setColor(GREEN);
     printHeader();
     printProduct(product);
-    setColor(LIGHTGRAY);
+    setColor(WHITE);
 }
 
 std::string limitStr(std::string s, int limit) {
