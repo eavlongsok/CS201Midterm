@@ -1,4 +1,5 @@
 #include <string>
+#include <chrono>
 
 #ifndef DATABASE_H
 #define DATABASE_H
@@ -102,4 +103,5 @@ class Database {
 };
 
 void setColor(Color color);
+
 #endif

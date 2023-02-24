@@ -288,7 +288,8 @@ void Database::modify(std::string id){
                 invalidInput = true;
                 break;
         }
-        if (!invalidInput)  Database::printRow(product);
+        // this line is used to make the display look
+        if (!invalidInput && !exit)  Database::printRow(product);
     }
 }
 
@@ -361,7 +362,7 @@ void Database::load(std::string fileName) {
     setColor(WHITE);
 }
 
-void Database:: ascendingSort() {
+void Database::ascendingSort() {
     auto now = std::chrono::system_clock::now();
 
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
@@ -386,7 +387,7 @@ void Database:: ascendingSort() {
     std::cout << "Sorted " << this->getSize() << " items in " << elapsed_seconds.count() * 1000 << "ms\n";
 }
 
-void Database:: descendingSort(){
+void Database::descendingSort(){
     auto now = std::chrono::system_clock::now();
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         // currentProduct is the main product to compare to others
