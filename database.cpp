@@ -369,11 +369,11 @@ void Database::ascendingSort() {
         // currentProduct is the main product to compare to others
         Product currentProduct = products[i];
         std::string currentID = currentProduct.ID;
-        // start comparing on the left side of ucurrentProduct
+        // start comparing on the left side of currentProduct
         int j = i - 1;
 
         // Compare currentID with each element on the left until an element with ID smaller than it is found
-        while (currentID < products[j].ID && j >= 0) {
+        while (j >= getStartingIndex() && currentID < products[j].ID) {
             // make the product on the right as the left one
             products[j + 1] = products[j];
             j--;
@@ -388,16 +388,18 @@ void Database::ascendingSort() {
 }
 
 void Database::descendingSort(){
+    std::cout << 3;
     auto now = std::chrono::system_clock::now();
+    std::cout << 4;
     for (int i = getStartingIndex(); i <= getEndingIndex(); i++) {
         // currentProduct is the main product to compare to others
         Product currentProduct = products[i];
         std::string currentID = currentProduct.ID;
-        // start comparing on the left side of ucurrentProduct
+        // start comparing on the left side of currentProduct
         int j = i - 1;
 
-        // Compare currentID with each element on the left until an element with ID smaller than it is found
-        while (currentID > products[j].ID && j >= 0) {
+        // Compare currentID with each element on the left until an element with ID greater than it is found
+        while (j >= getStartingIndex() && currentID < products[j].ID) {
             products[j + 1] = products[j];
             j--;
         }
